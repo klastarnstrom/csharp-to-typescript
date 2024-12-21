@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 
-namespace CsharpToTypeScript.Library;
+namespace CsharpToTypeScript.Library.Resolvers;
 
-public class TypeResolver
+public class DataTypeResolver
 {
     private readonly ReadOnlyDictionary<Type, string> _typeNames = new(new Dictionary<Type, string>
     {
@@ -43,7 +43,7 @@ public class TypeResolver
         typeof(decimal?)
     };
     
-    public string Resolve(MemberType type)
+    public string Resolve(Type type)
     {
         if (_numericTypes.Contains(type))
         {

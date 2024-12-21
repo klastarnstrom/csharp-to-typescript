@@ -1,10 +1,9 @@
-﻿// See https://aka.ms/new-console-template for more information
-
+﻿using CsharpToTypeScript.ExampleData;
 using CsharpToTypeScript.Library;
 
 var configuration = new TypeScriptConfiguration
 {
-   
+   IncludedNamespaces = ["CsharpToTypeScript.ExampleData"]
 };
 
-var generator = new TypeScriptGenerator(configuration);
+new TypeScriptGenerator(configuration).Generate();

@@ -1,44 +1,74 @@
 using System.Reflection;
+using CsharpToTypeScript.Library.Resolvers;
+using CsharpToTypeScript.Library.TypeGenerators;
+using CsharpToTypeScript.Library.TypeGenerators.Base;
 
 namespace CsharpToTypeScript.Library;
 
-public class TypeScriptGenerator
+public class TypeScriptGenerator(TypeScriptConfiguration configuration)
 {
-    private readonly TypeScriptConfiguration _configuration;
-    private readonly DataMemberResolver _dataMemberResolver;
+    private readonly InterfaceGenerator _interfaceGenerator = new();
+    private readonly EnumGenerator _enumGenerator = new();
 
-    public TypeScriptGenerator(TypeScriptConfiguration configuration)
+    public void Generate()
     {
-        _configuration = configuration;
-        _dataMemberResolver = new();
+        // Create output directory if it does not exist
+        var outputPath = $"c:/temp/{configuration.OutputPath}";
+        
+        Directory.CreateDirectory(outputPath);
+
+        var filePath = Path.Combine(outputPath, $"{configuration.FileName}");
+        
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+        
+        using var fileStream = File.Create(filePath);
+        using var writer = new StreamWriter(fileStream);
+
+        foreach (var includedNamespace in configuration.IncludedNamespaces)
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a =>
+                {
+                    var name = a.GetName().Name;
+
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        return false;
+                    }
+
+                    return !name.StartsWith("System.")
+                           && !name.StartsWith("Microsoft.")
+                           && !name.StartsWith("netstandard")
+                           && !name.StartsWith("mscorlib")
+                           && name != Assembly.GetExecutingAssembly().GetName().Name;
+                });
+
+            var allTypes = assemblies.SelectMany(a => a.GetTypes());
+            var types = allTypes
+                .Where(t => t.Namespace == includedNamespace)
+                .ToList();
+
+            foreach (var type in types)
+            {
+                var typeDeclaration = GenerateType(type);
+                writer.WriteLine();
+                writer.Write(typeDeclaration);
+            }
+        }
     }
 
-    public void Generate(Type type)
+    private string GenerateType(Type type)
     {
-        var outputPath = Path.Combine(_configuration.OutputPath, $"{type.Name}.ts");
-
-        using var writer = new StreamWriter(outputPath);
-        
-        var typeDeclaration = type switch 
+        if (type.IsEnum)
         {
-            { IsClass: true } => "class",
-            { IsInterface: true } => "interface",
-            { IsEnum: true } => "enum",
-            _ => throw new NotSupportedException($"Type {type.Name} is not supported.")
-        };
-        
-        writer.WriteLine($"{typeDeclaration} {type.Name} {{");
-        
-        var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-        var members = fields.Concat<MemberInfo>(properties);
-        
-        foreach (var member in members)
-        {
-            var memberResolveResult = _dataMemberResolver.Resolve(member);
+            return _enumGenerator.Generate(type);
         }
-
-        writer.WriteLine("}");
+        
+        var typeDeclaration = _interfaceGenerator.Generate(type);
+        
+        return typeDeclaration;
     }
 }
