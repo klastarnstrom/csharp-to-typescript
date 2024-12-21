@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>CSharpToTypeScript</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Update="App\Program.cs">
+        <Link>CsharpToTypescriptApp\Program.cs</Link>
+      </Compile>
+    </ItemGroup>
+
+</Project>
