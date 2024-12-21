@@ -1,9 +1,5 @@
-﻿using CsharpToTypeScript.ExampleData;
-using CsharpToTypeScript.Library;
+﻿using CsharpToTypeScript.Library;
 
-var configuration = new TypeScriptConfiguration
-{
-   IncludedNamespaces = ["CsharpToTypeScript.ExampleData"]
-};
+var configuration = new TypeScriptConfiguration();
 
 new TypeScriptGenerator(configuration).Generate();

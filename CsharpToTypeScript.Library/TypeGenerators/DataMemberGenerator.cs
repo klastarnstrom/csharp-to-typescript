@@ -1,10 +1,10 @@
-using CsharpToTypeScript.Library.Resolvers;
+using CsharpToTypeScript.Library.Resolvers.Base;
 
 namespace CsharpToTypeScript.Library.TypeGenerators;
 
-public class DataMemberGenerator
+internal class DataMemberGenerator
 {
-    public string Generate(DataMemberResolveResult dataMember)
+    internal string Generate(DataMemberResolveResult dataMember)
     {
         var firstLetter = dataMember.Name[0];
         var restOfName = dataMember.Name[1..];

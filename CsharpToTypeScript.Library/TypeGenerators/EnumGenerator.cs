@@ -1,19 +1,16 @@
 using System.Text;
-using CsharpToTypeScript.Library.TypeGenerators.Base;
 
 namespace CsharpToTypeScript.Library.TypeGenerators;
 
-public class EnumGenerator : ITypeDeclarationGenerator
+internal class EnumGenerator
 {
-    public string Generate(Type type)
+    public string Generate(EnumResolveResult result)
     {
-        var values = Enum.GetNames(type);
-        
         var sb = new StringBuilder();
         
-        sb.AppendLine($"export enum {type.Name} {{");
+        sb.AppendLine($"export enum {result.Name} {{");
         
-        foreach (var value in values)
+        foreach (var value in result.Values)
         {
             sb.AppendLine($"    {value} = \"{value}\",");
         }

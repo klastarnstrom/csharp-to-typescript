@@ -1,5 +1,8 @@
+using CsharpToTypeScript.Library.Attributes;
+
 namespace CsharpToTypeScript.ExampleData;
 
+[GenerateTypeScript]
 public class TestClass : ITestInterface
 {
     public string StringProperty { get; set; }
@@ -32,6 +35,7 @@ public class TestClass : ITestInterface
     public bool? NullableBoolProperty { get; set; }
 }
 
+[GenerateTypeScript]
 public interface ITestInterface
 {
     string StringProperty { get; set; }
@@ -62,9 +66,4 @@ public interface ITestInterface
     decimal? NullableDecimalProperty { get; set; }
     char? NullableCharProperty { get; set; }
     bool? NullableBoolProperty { get; set; }
-    // public TestEnum EnumProperty { get; set; }
-    // public TestClass NestedProperty { get; set; }
-    // public TestClass[] ArrayProperty { get; set; }
-    // public List<TestClass> ListProperty { get; set; }
-    // public Dictionary<string, TestClass> DictionaryProperty { get; set; }
 }
