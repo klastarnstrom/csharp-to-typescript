@@ -2,4 +2,4 @@
 
 var configuration = new TypeScriptConfiguration();
 
-new TypeScriptGenerator(configuration).Generate();
+await new TypeScriptGenerator(configuration).Generate();

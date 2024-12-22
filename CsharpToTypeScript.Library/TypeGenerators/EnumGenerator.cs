@@ -1,4 +1,5 @@
 using System.Text;
+using CsharpToTypeScript.Library.Resolvers;
 
 namespace CsharpToTypeScript.Library.TypeGenerators;
 

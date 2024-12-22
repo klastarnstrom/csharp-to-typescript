@@ -1,4 +1,4 @@
-using CsharpToTypeScript.Library.Resolvers.Base;
+using CsharpToTypeScript.Library.Resolvers;
 
 namespace CsharpToTypeScript.Library.TypeGenerators;
 
@@ -17,7 +17,12 @@ internal class DataMemberGenerator
             memberString += "?";
         }
             
-        memberString += $": {dataMember.Type};";
+        memberString += $": {dataMember.Type}";
+        
+        if (dataMember.IsArray)
+        {
+            memberString += "[]";
+        }
         
         return memberString;
     }

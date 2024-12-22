@@ -1,4 +1,6 @@
 using System.Text;
+using CsharpToTypeScript.Library.Constants;
+using CsharpToTypeScript.Library.Resolvers;
 
 namespace CsharpToTypeScript.Library.TypeGenerators;
 
@@ -14,7 +16,7 @@ internal class InterfaceGenerator
         
         foreach (var dataMember in result.DataMembers)
         {
-            sb.AppendLine($"    {_dataMemberGenerator.Generate(dataMember)}");
+            sb.AppendLine($"{SpecialCharacters.Tab}{_dataMemberGenerator.Generate(dataMember)}");
         }
         
         sb.AppendLine("}");

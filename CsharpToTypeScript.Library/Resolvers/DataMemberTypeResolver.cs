@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace CsharpToTypeScript.Library.Resolvers;
 
-internal class SystemTypeResolver
+internal class DataMemberTypeResolver
 {
     private readonly ReadOnlyDictionary<Type, string> _typeNames = new(new Dictionary<Type, string>
     {
@@ -51,12 +51,7 @@ internal class SystemTypeResolver
         }
         
         var typeName = _typeNames.GetValueOrDefault(type);
-
-        if (typeName == null)
-        {
-            throw new NotSupportedException($"Type {type.Name} is not supported.");
-        }
         
-        return typeName;
+        return typeName ?? type.Name;
     }
 }

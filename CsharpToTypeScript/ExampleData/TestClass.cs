@@ -2,7 +2,7 @@ using CsharpToTypeScript.Library.Attributes;
 
 namespace CsharpToTypeScript.ExampleData;
 
-[GenerateTypeScript]
+[TsGenerate]
 public class TestClass : ITestInterface
 {
     public string StringProperty { get; set; }
@@ -35,7 +35,15 @@ public class TestClass : ITestInterface
     public bool? NullableBoolProperty { get; set; }
 }
 
-[GenerateTypeScript]
+[TsGenerate]
+public class SecondTestClass
+{
+    public TestClass TestClassProperty { get; set; }
+    public TestClass[] TestClassArrayProperty { get; set; }
+    public List<TestClass> TestClassListProperty { get; set; }
+}
+
+[TsGenerate]
 public interface ITestInterface
 {
     string StringProperty { get; set; }
