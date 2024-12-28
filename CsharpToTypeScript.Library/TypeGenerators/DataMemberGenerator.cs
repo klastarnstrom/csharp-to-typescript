@@ -1,10 +1,8 @@
-using CsharpToTypeScript.Library.Resolvers;
-
 namespace CsharpToTypeScript.Library.TypeGenerators;
 
 internal class DataMemberGenerator
 {
-    internal string Generate(DataMemberResolveResult dataMember)
+    internal string Generate(TypeDataMember dataMember)
     {
         var firstLetter = dataMember.Name[0];
         var restOfName = dataMember.Name[1..];
@@ -12,14 +10,14 @@ internal class DataMemberGenerator
 
         var memberString = memberName;
             
-        if (dataMember.IsNullable)
+        if (dataMember.MetaData.IsNullable)
         {
             memberString += "?";
         }
             
-        memberString += $": {dataMember.Type}";
+        memberString += $": {dataMember.MetaData.Name}";
         
-        if (dataMember.IsArray)
+        if (dataMember.MetaData.IsArray)
         {
             memberString += "[]";
         }

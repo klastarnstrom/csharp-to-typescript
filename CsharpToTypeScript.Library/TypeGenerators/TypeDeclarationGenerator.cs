@@ -4,17 +4,17 @@ using CsharpToTypeScript.Library.Resolvers;
 
 namespace CsharpToTypeScript.Library.TypeGenerators;
 
-internal class InterfaceGenerator
+internal class TypeDeclarationGenerator
 {
     private readonly DataMemberGenerator _dataMemberGenerator = new();
     
-    public string Generate(InterfaceResolveResult result)
+    public string Generate(TypeMetadata metaData)
     {
         var sb = new StringBuilder();
         
-        sb.AppendLine($"export interface {result.Name} {{");
+        sb.AppendLine($"export interface {metaData.Name} {{");
         
-        foreach (var dataMember in result.DataMembers)
+        foreach (var dataMember in metaData.DataMembers)
         {
             sb.AppendLine($"{SpecialCharacters.Tab}{_dataMemberGenerator.Generate(dataMember)}");
         }

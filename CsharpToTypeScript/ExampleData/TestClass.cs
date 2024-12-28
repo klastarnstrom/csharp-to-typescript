@@ -2,7 +2,6 @@ using CsharpToTypeScript.Library.Attributes;
 
 namespace CsharpToTypeScript.ExampleData;
 
-[TsGenerate]
 public class TestClass : ITestInterface
 {
     public string StringProperty { get; set; }
@@ -38,12 +37,12 @@ public class TestClass : ITestInterface
 [TsGenerate]
 public class SecondTestClass
 {
-    public TestClass TestClassProperty { get; set; }
+    // public ArrayItemTestClass TestClassProperty { get; set; }
     public TestClass[] TestClassArrayProperty { get; set; }
     public List<TestClass> TestClassListProperty { get; set; }
+    public IEnumerable<TestClass> TestClassEnumerableProperty { get; set; }
 }
 
-[TsGenerate]
 public interface ITestInterface
 {
     string StringProperty { get; set; }

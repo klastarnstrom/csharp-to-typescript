@@ -1,5 +1,4 @@
 using CsharpToTypeScript.Library.Attributes;
-using CsharpToTypeScript.Library.Constants;
 using CsharpToTypeScript.Library.Resolvers;
 using CsharpToTypeScript.Library.TypeGenerators;
 
@@ -10,7 +9,7 @@ public class TypeScriptGenerator(TypeScriptConfiguration? configuration = null)
 {
     private readonly TypeScriptConfiguration _configuration = configuration ?? new ();
     private readonly TypesResolver _typesResolver = new();
-    private readonly InterfaceGenerator _interfaceGenerator = new();
+    private readonly TypeDeclarationGenerator _typeDeclarationGenerator = new();
     private readonly EnumGenerator _enumGenerator = new();
 
     public async Task Generate()
@@ -35,12 +34,13 @@ public class TypeScriptGenerator(TypeScriptConfiguration? configuration = null)
         }
     }
 
-    private string GenerateTypeString(TypeResolveResult result) =>
-        result.GenerateType switch
+    private string GenerateTypeString(TypeMetadata metaData)
+    {
+        if (metaData.IsEnum)
         {
-            GenerateType.Interface when result is InterfaceResolveResult interfaceResult =>
-                _interfaceGenerator.Generate(interfaceResult),
-            GenerateType.Enum when result is EnumResolveResult enumResult => _enumGenerator.Generate(enumResult),
-            _ => throw new NotSupportedException($"Type {result.GenerateType} is not supported.")
-        };
+            return _enumGenerator.Generate(metaData);
+        }
+        
+        return _typeDeclarationGenerator.Generate(metaData);
+    }
 }

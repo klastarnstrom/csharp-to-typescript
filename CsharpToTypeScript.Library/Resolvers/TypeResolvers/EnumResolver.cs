@@ -1,9 +1,14 @@
-namespace CsharpToTypeScript.Library.Resolvers;
+using CsharpToTypeScript.Library.Resolvers.TypeResolvers.Base;
+
+namespace CsharpToTypeScript.Library.Resolvers.TypeResolvers;
 
 internal class EnumResolver : ITypeResolver
 {
-    public TypeResolveResult Resolve(Type type)
-    {
-        return new EnumResolveResult(type.Name, Enum.GetNames(type));
-    }
+    public TypeMetadata Resolve(Type type) =>
+        new()
+        {
+            Name = type.Name,
+            IsEnum = true,
+            EnumValues = Enum.GetNames(type).ToList(),
+        };
 }

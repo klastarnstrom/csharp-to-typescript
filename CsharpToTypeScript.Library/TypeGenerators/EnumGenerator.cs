@@ -5,13 +5,13 @@ namespace CsharpToTypeScript.Library.TypeGenerators;
 
 internal class EnumGenerator
 {
-    public string Generate(EnumResolveResult result)
+    public string Generate(TypeMetadata metaData)
     {
         var sb = new StringBuilder();
         
-        sb.AppendLine($"export enum {result.Name} {{");
+        sb.AppendLine($"export enum {metaData.Name} {{");
         
-        foreach (var value in result.Values)
+        foreach (var value in metaData.EnumValues ?? [])
         {
             sb.AppendLine($"    {value} = \"{value}\",");
         }
