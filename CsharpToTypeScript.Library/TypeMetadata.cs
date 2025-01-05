@@ -4,6 +4,7 @@ namespace CsharpToTypeScript.Library;
 
 public record TypeMetadata
 {
+    public required Type Type { get; init; }
     public required string Name { get; init; }
     
     public bool IsClass { get; init; }
@@ -17,11 +18,6 @@ public record TypeMetadata
     [MemberNotNullWhen(true, nameof(IsEnum))]
     public List<string>? EnumValues { get; init; }
 
-    public bool IsArray { get; init; }
-
-    [MemberNotNullWhen(true, nameof(IsArray))]
-    public Type? ArrayElementType { get; init; }
-
     public bool IsDictionary { get; init; }
 
     [MemberNotNullWhen(true, nameof(IsDictionary))]
@@ -34,5 +30,6 @@ public record TypeMetadata
 public record TypeDataMember
 {
     public string Name { get; init; }
+    public bool IsArray { get; init; }
     public TypeMetadata MetaData { get; init; }
 }

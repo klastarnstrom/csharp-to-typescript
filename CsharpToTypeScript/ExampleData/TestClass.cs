@@ -2,6 +2,27 @@ using CsharpToTypeScript.Library.Attributes;
 
 namespace CsharpToTypeScript.ExampleData;
 
+[TsGenerate]
+public class TestClass1
+{
+    public string ValueProperty { get; set; }
+    public string[] ValueArrayProperty { get; set; }
+    public TestEnum1 EnumProperty { get; set; }
+}
+
+[TsGenerate]
+public class TestClass2
+{
+    public TestClass1 ObjectProperty { get; set; }
+    public TestClass1[] ObjectArrayProperty { get; set; }
+    public List<TestClass1> ObjectListProperty { get; set; }
+}
+
+public enum TestEnum1
+{
+    
+}
+
 public class TestClass : ITestInterface
 {
     public string StringProperty { get; set; }
@@ -34,7 +55,6 @@ public class TestClass : ITestInterface
     public bool? NullableBoolProperty { get; set; }
 }
 
-[TsGenerate]
 public class SecondTestClass
 {
     // public ArrayItemTestClass TestClassProperty { get; set; }

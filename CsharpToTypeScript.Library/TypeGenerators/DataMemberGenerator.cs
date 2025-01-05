@@ -17,7 +17,7 @@ internal class DataMemberGenerator
             
         memberString += $": {dataMember.MetaData.Name}";
         
-        if (dataMember.MetaData.IsArray)
+        if (dataMember.IsArray)
         {
             memberString += "[]";
         }
