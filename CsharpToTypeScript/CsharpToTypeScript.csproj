@@ -6,10 +6,12 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>CSharpToTypeScript</AssemblyName>
+        <RootNamespace>CSharpToTypeScript</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CsharpToTypeScript.Library\CsharpToTypeScript.Library.csproj" />
+      <ProjectReference Include="..\CSharpToTypeScript.Library\CSharpToTypeScript.Library.csproj" />
     </ItemGroup>
 
 </Project>

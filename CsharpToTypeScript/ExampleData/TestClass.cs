@@ -1,4 +1,4 @@
-using CsharpToTypeScript.Library.Attributes;
+using CSharpToTypeScript.Library.Attributes;
 
 namespace CsharpToTypeScript.ExampleData;
 
@@ -18,9 +18,19 @@ public class TestClass2
     public List<TestClass1> ObjectListProperty { get; set; }
 }
 
+[TsGenerate]
+public class InheritingClass : BaseClass;
+
+public class BaseClass
+{
+    public string StringProperty { get; set; }
+}
+
 public enum TestEnum1
 {
-    
+    Value1,
+    Value2,
+    Value3
 }
 
 public class TestClass : ITestInterface

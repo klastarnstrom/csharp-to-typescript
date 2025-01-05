@@ -1,4 +1,4 @@
-﻿using CsharpToTypeScript.Library;
+﻿using CSharpToTypeScript.Library;
 
 var configuration = new TypeScriptConfiguration();
 

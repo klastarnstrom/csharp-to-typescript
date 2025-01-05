@@ -1,4 +1,4 @@
-namespace CsharpToTypeScript.Library.Constants;
+namespace CSharpToTypeScript.Library.Constants;
 
 public static class SpecialCharacters
 { 

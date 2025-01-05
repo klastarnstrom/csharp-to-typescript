@@ -1,4 +1,4 @@
-﻿namespace CsharpToTypeScript.Library;
+﻿namespace CSharpToTypeScript.Library;
 
 public class TypeScriptConfiguration
 {
