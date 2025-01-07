@@ -3,9 +3,9 @@ using CSharpToTypeScript.Library.Models;
 
 namespace CSharpToTypeScript.Library.Generators;
 
-internal class EnumGenerator
+internal static class EnumGenerator
 {
-    public string Generate(TypeScriptEnum typeScriptEnum)
+    public static Task<string> Generate(TypeScriptEnum typeScriptEnum)
     {
         var sb = new StringBuilder();
 
@@ -18,6 +18,6 @@ internal class EnumGenerator
 
         sb.AppendLine("}");
 
-        return sb.ToString();
+        return Task.FromResult(sb.ToString());
     }
 }
