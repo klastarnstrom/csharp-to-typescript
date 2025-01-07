@@ -17,11 +17,4 @@ public class TypeScriptGenerator(TypeScriptConfiguration? configuration = null)
         
         await writer.WriteTypeScriptFile(collectedTypes);
     }
-
-    private static TypeScriptEnum ResolveEnum(Type type) =>
-        new()
-        {
-            Name = type.Name,
-            EnumValues = Enum.GetNames(type).ToList(),
-        };
 }

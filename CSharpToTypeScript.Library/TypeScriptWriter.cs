@@ -12,7 +12,8 @@ public class TypeScriptWriter : IAsyncDisposable
     public TypeScriptWriter(TypeScriptConfiguration configuration)
     {
         var randomFileName = Path.GetRandomFileName();
-        var filePath = Path.Combine(configuration.OutputPath, $"{randomFileName}.ts");
+        var filePath = Path.Combine(configuration.OutputPath,
+            $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_{randomFileName}.ts");
         _writer = new(filePath);
         _configuration = configuration;
     }
@@ -35,7 +36,19 @@ public class TypeScriptWriter : IAsyncDisposable
 
             if (typeScriptType is TypeScriptInterface tsInterface)
             {
-                await writer.AddLine($"export interface {typeScriptType.Name} {{");
+                await writer.Add($"export interface {typeScriptType.Name}");
+
+                if (tsInterface.BaseType != null)
+                {
+                    await writer.Add($" extends {tsInterface.BaseType.Name}");
+                }
+
+                if (tsInterface.ImplementedInterfaces.Count != 0)
+                {
+                    await writer.Add($", {string.Join(", ", tsInterface.ImplementedInterfaces.Select(i => i.Name))}");
+                }
+
+                await writer.AddLine(" {");
 
                 foreach (var property in tsInterface.Properties)
                 {
@@ -46,29 +59,34 @@ public class TypeScriptWriter : IAsyncDisposable
             }
         }
     }
-    
-    public async Task AddLine(string? line = "")
+
+    private async Task Add(string text)
+    {
+        await _writer.WriteAsync(text);
+    }
+
+    private async Task AddLine(string? line = "")
     {
         await _writer.WriteLineAsync(line);
     }
-    
-    public async Task AddType(string type)
+
+    private async Task AddType(string type)
     {
         await AddLine();
         await _writer.WriteLineAsync(type);
     }
-    
-    public async Task Comment(string comment)
+
+    private async Task Comment(string comment)
     {
         await _writer.WriteLineAsync($"{SpecialCharacters.SingleLineComment} {comment}");
     }
-    
-    public void ClearFile()
+
+    private void ClearFile()
     {
         _writer.BaseStream.SetLength(0);
     }
-    
-    public void CreateOutputDirectory()
+
+    private void CreateOutputDirectory()
     {
         Directory.CreateDirectory(_configuration.OutputPath);
     }

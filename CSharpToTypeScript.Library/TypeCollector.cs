@@ -37,7 +37,7 @@ public class TypeCollector(Assembly[] assemblies)
 
         if (IsSystemType(typeToResolve))
         {
-            return TypeScriptSystemType.Create(type);
+            return TypeScriptSystemType.Create(typeToResolve);
         }
 
         if (typeToResolve.IsEnum)
@@ -76,7 +76,9 @@ public class TypeCollector(Assembly[] assemblies)
             }
         }
 
-        foreach (var property in type.GetProperties())
+        var properties = type.GetProperties().Where(p => p.DeclaringType == type);
+        
+        foreach (var property in properties)
         {
             var resolvedType = CollectReferencedTypes(property.PropertyType, visited);
 
@@ -87,7 +89,9 @@ public class TypeCollector(Assembly[] assemblies)
             });
         }
 
-        foreach (var field in type.GetFields())
+        var fields = type.GetFields().Where(f => f.DeclaringType == type);
+        
+        foreach (var field in fields)
         {
             var resolvedType = CollectReferencedTypes(field.FieldType, visited);
 
@@ -98,14 +102,17 @@ public class TypeCollector(Assembly[] assemblies)
             });
         }
 
-        if (type.BaseType != null)
+        if (type.BaseType != null && !IsSystemType(type.BaseType))
         {
             typeScriptType.BaseType = CollectReferencedTypes(type.BaseType, visited);
         }
 
         foreach (var implementedInterface in type.GetInterfaces())
         {
-            typeScriptType.ImplementedInterfaces.Add(CollectReferencedTypes(implementedInterface, visited));
+            if (!IsSystemType(implementedInterface))
+            {
+                typeScriptType.ImplementedInterfaces.Add(CollectReferencedTypes(implementedInterface, visited));
+            }
         }
 
         visited.TryAdd(type, typeScriptType);
