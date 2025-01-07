@@ -22,4 +22,8 @@
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CSharpToTypeScript.Library\CSharpToTypeScript.Library.csproj" />
+    </ItemGroup>
+
 </Project>
