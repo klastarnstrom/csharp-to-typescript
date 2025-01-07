@@ -36,6 +36,11 @@ public class TypeCollector(Assembly[] assemblies)
         var isArray = IsArrayOrEnumerable(type);
         var typeToResolve = isArray ? GetArrayElementType(type) : type;
 
+        if (typeof(Delegate).IsAssignableFrom(typeToResolve))
+        {
+            throw new ArgumentException("Delegates are not supported", nameof(type));
+        }
+        
         if (IsSystemType(typeToResolve))
         {
             return new(TypeScriptSystemType.Create(typeToResolve), isArray)
