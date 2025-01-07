@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CSharpToTypeScript.Library.Constants;
 using CSharpToTypeScript.Library.Generators;
 using CSharpToTypeScript.Library.Models;
@@ -52,7 +53,14 @@ public class TypeScriptWriter : IAsyncDisposable
 
                 foreach (var property in tsInterface.Properties)
                 {
-                    await writer.AddLine($"    {property.Name}: {property.Type.Name};");
+                    await writer.Add($"    {property.CamelCaseName}: {property.Type.Name}");
+                    
+                    if (property.IsArray)
+                    {
+                        await writer.Add("[]");
+                    }
+                    
+                    await writer.AddLine(";");
                 }
 
                 await writer.AddLine("}");

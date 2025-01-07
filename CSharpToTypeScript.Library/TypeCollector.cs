@@ -24,20 +24,24 @@ public class TypeCollector(Assembly[] assemblies)
         return Task.FromResult(visitedTypes);
     }
 
-    private static TypeScriptType CollectReferencedTypes(Type type, Dictionary<Type, TypeScriptType> visited)
+    private static CollectedTypeResult CollectReferencedTypes(Type type, Dictionary<Type, TypeScriptType> visited)
     {
         var typeAlreadyVisited = visited.ContainsKey(type);
 
         if (typeAlreadyVisited)
         {
-            return visited[type];
+            return new(visited[type]);
         }
 
-        var typeToResolve = IsArrayOrEnumerable(type) ? GetArrayElementType(type) : type;
+        var isArray = IsArrayOrEnumerable(type);
+        var typeToResolve = isArray ? GetArrayElementType(type) : type;
 
         if (IsSystemType(typeToResolve))
         {
-            return TypeScriptSystemType.Create(typeToResolve);
+            return new(TypeScriptSystemType.Create(typeToResolve), isArray)
+            {
+                IsSystemType = true
+            };
         }
 
         if (typeToResolve.IsEnum)
@@ -50,12 +54,12 @@ public class TypeCollector(Assembly[] assemblies)
 
             visited.Add(typeToResolve, tsEnum);
 
-            return tsEnum;
+            return new(tsEnum);
         }
 
         if (typeToResolve.IsInterface || typeToResolve.IsClass)
         {
-            return ResolveInterface(typeToResolve, visited);
+            return new(ResolveInterface(typeToResolve, visited), isArray);
         }
 
         throw new ArgumentException("Type is not supported", nameof(type));
@@ -72,46 +76,43 @@ public class TypeCollector(Assembly[] assemblies)
         {
             foreach (var genericTypeArgument in type.GetGenericArguments())
             {
-                typeScriptType.GenericArguments.Add(CollectReferencedTypes(genericTypeArgument, visited));
+                typeScriptType.GenericArguments.Add(CollectReferencedTypes(genericTypeArgument, visited)
+                    .TypeScriptType);
             }
         }
 
         var properties = type.GetProperties().Where(p => p.DeclaringType == type);
-        
+
         foreach (var property in properties)
         {
             var resolvedType = CollectReferencedTypes(property.PropertyType, visited);
 
-            typeScriptType.Properties.Add(new()
-            {
-                Name = property.Name,
-                Type = resolvedType,
-            });
+            typeScriptType.Properties.Add(new(property.Name, resolvedType.TypeScriptType,
+                resolvedType.IsArrayElementType));
         }
 
         var fields = type.GetFields().Where(f => f.DeclaringType == type);
-        
+
         foreach (var field in fields)
         {
             var resolvedType = CollectReferencedTypes(field.FieldType, visited);
 
-            typeScriptType.Properties.Add(new()
-            {
-                Name = field.Name,
-                Type = resolvedType,
-            });
+            typeScriptType.Properties.Add(new(field.Name, resolvedType.TypeScriptType,
+                resolvedType.IsArrayElementType));
         }
 
         if (type.BaseType != null && !IsSystemType(type.BaseType))
         {
-            typeScriptType.BaseType = CollectReferencedTypes(type.BaseType, visited);
+            typeScriptType.BaseType = CollectReferencedTypes(type.BaseType, visited).TypeScriptType;
         }
 
         foreach (var implementedInterface in type.GetInterfaces())
         {
-            if (!IsSystemType(implementedInterface))
+            var resolvedType = CollectReferencedTypes(implementedInterface, visited);
+
+            if (!resolvedType.IsSystemType)
             {
-                typeScriptType.ImplementedInterfaces.Add(CollectReferencedTypes(implementedInterface, visited));
+                typeScriptType.ImplementedInterfaces.Add(resolvedType.TypeScriptType);
             }
         }
 
@@ -140,7 +141,7 @@ public class TypeCollector(Assembly[] assemblies)
         {
             return false;
         }
-        
+
         if (type.IsArray)
         {
             return true;
