@@ -10,7 +10,8 @@ public class TypeCollector(Assembly[] assemblies)
     {
         var typesWithAttribute = assemblies
             .SelectMany(assembly => assembly.GetTypes())
-            .Where(type => Attribute.IsDefined(type, typeof(TsGenerateAttribute)))
+            // IsPublic does not cover all public cases
+            .Where(type => !type.IsNotPublic && Attribute.IsDefined(type, typeof(TsGenerateAttribute)))
             .ToHashSet();
 
         var visitedTypes = new Dictionary<Type, TypeScriptType>();
@@ -23,7 +24,7 @@ public class TypeCollector(Assembly[] assemblies)
         return Task.FromResult(visitedTypes);
     }
 
-    private static TypeScriptType? CollectReferencedTypes(Type type, Dictionary<Type, TypeScriptType> visited)
+    private static TypeScriptType CollectReferencedTypes(Type type, Dictionary<Type, TypeScriptType> visited)
     {
         var typeAlreadyVisited = visited.ContainsKey(type);
 
@@ -32,12 +33,12 @@ public class TypeCollector(Assembly[] assemblies)
             return visited[type];
         }
 
-        if (IsSystemType(type))
-        {
-            return null;
-        }
-
         var typeToResolve = IsArrayOrEnumerable(type) ? GetArrayElementType(type) : type;
+
+        if (IsSystemType(typeToResolve))
+        {
+            return TypeScriptSystemType.Create(type);
+        }
 
         if (typeToResolve.IsEnum)
         {
@@ -60,7 +61,7 @@ public class TypeCollector(Assembly[] assemblies)
         throw new ArgumentException("Type is not supported", nameof(type));
     }
 
-    private static TypeScriptType? ResolveInterface(Type type, Dictionary<Type, TypeScriptType> visited)
+    private static TypeScriptInterface ResolveInterface(Type type, Dictionary<Type, TypeScriptType> visited)
     {
         var typeScriptType = new TypeScriptInterface
         {
@@ -71,12 +72,7 @@ public class TypeCollector(Assembly[] assemblies)
         {
             foreach (var genericTypeArgument in type.GetGenericArguments())
             {
-                var resolvedType = CollectReferencedTypes(genericTypeArgument, visited);
-
-                if (resolvedType != null)
-                {
-                    typeScriptType.GenericArguments.Add(resolvedType);
-                }
+                typeScriptType.GenericArguments.Add(CollectReferencedTypes(genericTypeArgument, visited));
             }
         }
 
@@ -84,48 +80,32 @@ public class TypeCollector(Assembly[] assemblies)
         {
             var resolvedType = CollectReferencedTypes(property.PropertyType, visited);
 
-            if (resolvedType != null)
+            typeScriptType.Properties.Add(new()
             {
-                typeScriptType.Properties.Add(new()
-                {
-                    Name = property.Name,
-                    Type = resolvedType,
-                });
-            }
+                Name = property.Name,
+                Type = resolvedType,
+            });
         }
 
         foreach (var field in type.GetFields())
         {
             var resolvedType = CollectReferencedTypes(field.FieldType, visited);
 
-            if (resolvedType != null)
+            typeScriptType.Properties.Add(new()
             {
-                typeScriptType.Properties.Add(new()
-                {
-                    Name = field.Name,
-                    Type = resolvedType,
-                });
-            }
+                Name = field.Name,
+                Type = resolvedType,
+            });
         }
 
         if (type.BaseType != null)
         {
-            var resolvedType = CollectReferencedTypes(type.BaseType, visited);
-            
-            if (resolvedType != null)
-            {
-                typeScriptType.BaseType = resolvedType;
-            }
+            typeScriptType.BaseType = CollectReferencedTypes(type.BaseType, visited);
         }
 
         foreach (var implementedInterface in type.GetInterfaces())
         {
-            var resolvedType = CollectReferencedTypes(implementedInterface, visited);
-            
-            if (resolvedType != null)
-            {
-                typeScriptType.ImplementedInterfaces.Add(resolvedType);
-            }
+            typeScriptType.ImplementedInterfaces.Add(CollectReferencedTypes(implementedInterface, visited));
         }
 
         visited.TryAdd(type, typeScriptType);
@@ -149,6 +129,11 @@ public class TypeCollector(Assembly[] assemblies)
 
     private static bool IsArrayOrEnumerable(Type type)
     {
+        if (type == typeof(string))
+        {
+            return false;
+        }
+        
         if (type.IsArray)
         {
             return true;
