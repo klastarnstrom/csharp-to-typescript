@@ -5,6 +5,14 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>CSharpToTypeScript</PackageId>
+        <Title>CSharpToTypeScript</Title>
+        <Authors>Klas Tärnström</Authors>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Description>This is a simple, opinionated tool used to convert C# classes, interfaces and enums to TypeScript interfaces. The intended use case is to convert .NET API request and response classes to TypeScript interfaces for use in a front-end application.</Description>
+        <Copyright>https://github.com/klastarnstrom/csharp-to-typescript</Copyright>
+        <RepositoryUrl>https://github.com/klastarnstrom/csharp-to-typescript.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
 </Project>
