@@ -40,11 +40,9 @@ public class TypeScriptSystemType : TypeScriptType
         { typeof(char?), "string" },
     });
 
-    public static TypeScriptType Create(Type type)
-    {
-        return new TypeScriptSystemType
+    public static TypeScriptType Create(Type type) =>
+        new TypeScriptSystemType
         {
-            Name = TypeMap[type],
+            Name = TypeMap.GetValueOrDefault(type) ?? "any"
         };
-    }
 }
