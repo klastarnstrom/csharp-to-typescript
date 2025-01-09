@@ -1,43 +1,49 @@
-using System.Text.RegularExpressions;
-
 namespace CSharpToTypeScript.Library.Models;
 
-public partial record TypeScriptProperty(string Name, TypeScriptType Type, bool IsArray = false)
+public record TypeScriptProperty(string Name, TypeScriptType Type, bool IsArray = false)
 {
     public string CamelCaseName => ToCamelCase(Name);
 
-    private static string ToCamelCase(string pascalCase)
+    // Convert PascalCase to camelCase
+    // Copied from src/libraries/System.Text.Json/Common/JsonCamelCaseNamingPolicy.cs
+    private static string ToCamelCase(string propertyName)
     {
-        // Check if the input is not null or empty
-        if (string.IsNullOrEmpty(pascalCase))
+        if (string.IsNullOrEmpty(propertyName) || !char.IsUpper(propertyName[0]))
         {
-            return pascalCase;
+            return propertyName;
         }
 
-        // Define a regular expression for detecting acronyms
-        var acronymRegex = PascalCaseRegex();
-
-        // If the first part of the string is an acronym, don't convert it
-        if (acronymRegex.IsMatch(pascalCase))
+        return string.Create(propertyName.Length, propertyName, (chars, name) =>
         {
-            return pascalCase[0].ToString().ToLower() + pascalCase[1..];
-        }
-
-        var numberRegex = DigitRegex();
-
-        // If the string starts with a number, leave it as is and just lowercase the first letter of the rest
-        if (numberRegex.IsMatch(pascalCase))
-        {
-            return pascalCase[0].ToString() + char.ToLower(pascalCase[1]) + pascalCase[2..];
-        }
-
-        // Otherwise, convert the first letter to lowercase to make it camelCase
-        return char.ToLower(pascalCase[0]) + pascalCase[1..];
+            name.CopyTo(chars);
+            FixCasing(chars);
+        });
     }
 
-    [GeneratedRegex(@"^[A-Z]+(?=[A-Z][a-z])")]
-    private static partial Regex PascalCaseRegex();
-    
-    [GeneratedRegex(@"^\d")]
-    private static partial Regex DigitRegex();
+    private static void FixCasing(Span<char> chars)
+    {
+        for (var i = 0; i < chars.Length; i++)
+        {
+            if (i == 1 && !char.IsUpper(chars[i]))
+            {
+                break;
+            }
+
+            var hasNext = i + 1 < chars.Length;
+
+            // Stop when next char is already lowercase.
+            if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
+            {
+                // If the next char is a space, lowercase current char before exiting.
+                if (chars[i + 1] == ' ')
+                {
+                    chars[i] = char.ToLowerInvariant(chars[i]);
+                }
+
+                break;
+            }
+
+            chars[i] = char.ToLowerInvariant(chars[i]);
+        }
+    }
 }
