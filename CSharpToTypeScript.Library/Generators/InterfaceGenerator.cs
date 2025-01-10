@@ -73,6 +73,12 @@ public class InterfaceGenerator
             }
         }
 
+        if (tsInterface.Properties.Count == 0)
+        {
+            builder.AppendLine(" {}");
+            return Task.FromResult(builder.ToString());
+        }
+        
         builder.AppendLine(" {");
 
         foreach (var property in tsInterface.Properties)
