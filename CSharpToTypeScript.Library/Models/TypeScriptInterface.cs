@@ -1,6 +1,6 @@
 namespace CSharpToTypeScript.Library.Models;
 
-public class TypeScriptInterface : TypeScriptType
+public class TypeScriptInterface(string name) : TypeScriptType(name)
 {
     public TypeScriptType? BaseType { get; set; }
     public List<TypeScriptType> ImplementedInterfaces { get; } = [];

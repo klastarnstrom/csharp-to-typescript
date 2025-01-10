@@ -30,7 +30,7 @@ public class TypeCollector(Assembly[] assemblies)
 
         if (typeAlreadyVisited)
         {
-            return new(visited[type]);
+            return new(visited[type], false);
         }
 
         var isArray = IsArrayOrEnumerable(type);
@@ -43,23 +43,16 @@ public class TypeCollector(Assembly[] assemblies)
 
         if (IsSystemType(typeToResolve))
         {
-            return new(TypeScriptSystemType.Create(typeToResolve), isArray)
-            {
-                IsSystemType = true
-            };
+            return new(TypeScriptSystemType.Create(typeToResolve), true, isArray);
         }
 
         if (typeToResolve.IsEnum)
         {
-            var tsEnum = new TypeScriptEnum
-            {
-                Name = typeToResolve.Name,
-                EnumValues = Enum.GetNames(typeToResolve).ToList(),
-            };
+            var tsEnum = new TypeScriptEnum(typeToResolve.Name, Enum.GetNames(typeToResolve).ToList());
 
             visited.Add(typeToResolve, tsEnum);
 
-            return new(tsEnum);
+            return new(tsEnum, false);
         }
 
         if (typeToResolve.IsInterface || typeToResolve.IsClass)
@@ -72,9 +65,8 @@ public class TypeCollector(Assembly[] assemblies)
 
     private static TypeScriptInterface ResolveInterface(Type type, Dictionary<Type, TypeScriptType> visited)
     {
-        var typeScriptType = new TypeScriptInterface
+        var typeScriptType = new TypeScriptInterface(type.IsGenericType ? type.Name.Split('`')[0] : type.Name)
         {
-            Name = type.Name,
             IsOpenGenericType = type.IsGenericTypeDefinition,
             IsGenericParameter = type.IsGenericParameter,
         };
@@ -88,16 +80,11 @@ public class TypeCollector(Assembly[] assemblies)
                 CollectReferencedTypes(openType, visited);
             }
 
-            typeScriptType.Name = type.Name.Split('`')[0];
-
             foreach (var genericTypeArgument in type.GetGenericArguments())
             {
                 if (genericTypeArgument.IsGenericTypeParameter)
                 {
-                    typeScriptType.GenericArguments.Add(new TypeScriptGenericParameter
-                    {
-                        Name = genericTypeArgument.Name,
-                    });
+                    typeScriptType.GenericArguments.Add(new TypeScriptGenericParameter(genericTypeArgument.Name));
                 }
                 else if (CollectReferencedTypes(genericTypeArgument, visited) is { } resolvedType)
                 {

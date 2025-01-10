@@ -30,6 +30,7 @@ public class TestClass2
     public List<TestClass1> ObjectListProperty { get; set; }
 }
 
+[TsGenerate]
 public class InheritingClass : BaseClass;
 
 public class BaseClass
@@ -44,6 +45,7 @@ public enum TestEnum1
     Value3
 }
 
+[TsGenerate]
 public class TestClass : ITestInterface
 {
     public string StringProperty { get; set; }
@@ -76,6 +78,7 @@ public class TestClass : ITestInterface
     public bool? NullableBoolProperty { get; set; }
 }
 
+[TsGenerate]
 public class SecondTestClass
 {
     // public ArrayItemTestClass TestClassProperty { get; set; }

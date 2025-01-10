@@ -1,6 +1,6 @@
 namespace CSharpToTypeScript.Library.Models;
 
-public abstract class TypeScriptType 
+public abstract class TypeScriptType(string name)
 {
-    public required string Name { get; set; }
+    public string Name { get; } = name;
 }

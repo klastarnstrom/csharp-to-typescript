@@ -1,8 +1,8 @@
 namespace CSharpToTypeScript.Library.Models;
 
-public record CollectedTypeResult(
-    TypeScriptType TypeScriptType,
-    bool IsArrayElementType = false)
+public class CollectedTypeResult(TypeScriptType typeScriptType, bool isSystemType, bool isArrayElementType = false)
 {
-    public bool IsSystemType { get; init; }
+    public TypeScriptType TypeScriptType { get; } = typeScriptType;
+    public bool IsSystemType { get; } = isSystemType;
+    public bool IsArrayElementType { get; } = isArrayElementType;
 }

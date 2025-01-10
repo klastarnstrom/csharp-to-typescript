@@ -1,8 +1,10 @@
 namespace CSharpToTypeScript.Library.Models;
 
-public record TypeScriptProperty(string Name, TypeScriptType Type, bool IsArray = false)
+public class TypeScriptProperty(string name, TypeScriptType typeScriptType, bool isArray = false)
 {
-    public string CamelCaseName => ToCamelCase(Name);
+    public string Name => ToCamelCase(name);
+    public TypeScriptType Type { get; } = typeScriptType;
+    public bool IsArray { get; } = isArray;
 
     // Convert PascalCase to camelCase
     // Copied from src/libraries/System.Text.Json/Common/JsonCamelCaseNamingPolicy.cs
@@ -13,14 +15,10 @@ public record TypeScriptProperty(string Name, TypeScriptType Type, bool IsArray 
             return propertyName;
         }
 
-        return string.Create(propertyName.Length, propertyName, (chars, name) =>
-        {
-            name.CopyTo(chars);
-            FixCasing(chars);
-        });
+        return FixCasing(propertyName.ToCharArray());
     }
 
-    private static void FixCasing(Span<char> chars)
+    private static string FixCasing(char[] chars)
     {
         for (var i = 0; i < chars.Length; i++)
         {
@@ -45,5 +43,7 @@ public record TypeScriptProperty(string Name, TypeScriptType Type, bool IsArray 
 
             chars[i] = char.ToLowerInvariant(chars[i]);
         }
+        
+        return new(chars);
     }
 }

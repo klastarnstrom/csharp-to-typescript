@@ -1,6 +1,6 @@
 namespace CSharpToTypeScript.Library.Models;
 
-public class TypeScriptEnum : TypeScriptType
+public class TypeScriptEnum(string name, List<string> enumValues) : TypeScriptType(name)
 {
-    public required List<string> EnumValues { get; init; } = [];
+    public  List<string> EnumValues { get; } = enumValues;
 } 

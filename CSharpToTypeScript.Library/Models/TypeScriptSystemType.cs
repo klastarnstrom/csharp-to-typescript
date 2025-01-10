@@ -2,8 +2,10 @@ using System.Collections.ObjectModel;
 
 namespace CSharpToTypeScript.Library.Models;
 
-public class TypeScriptSystemType : TypeScriptType
+public class TypeScriptSystemType(string name) : TypeScriptType(name)
 {
+    public string TypeName { get; } = name;
+
     // Type to TypeScript type name mapping
     private static readonly ReadOnlyDictionary<Type, string> TypeMap = new(new Dictionary<Type, string>
     {
@@ -41,8 +43,5 @@ public class TypeScriptSystemType : TypeScriptType
     });
 
     public static TypeScriptType Create(Type type) =>
-        new TypeScriptSystemType
-        {
-            Name = TypeMap.GetValueOrDefault(type) ?? "any"
-        };
+        new TypeScriptSystemType(TypeMap.GetValueOrDefault(type) ?? "any");
 }

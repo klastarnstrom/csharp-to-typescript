@@ -1,5 +1,3 @@
-using CSharpToTypeScript.Library.Models;
-
 namespace CSharpToTypeScript.Library;
 
 public class TypeScriptGenerator(TypeScriptConfiguration? configuration = null)

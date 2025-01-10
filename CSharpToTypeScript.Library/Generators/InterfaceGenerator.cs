@@ -77,7 +77,7 @@ public class InterfaceGenerator
 
         foreach (var property in tsInterface.Properties)
         {
-            builder.Append($"    {property.CamelCaseName}: {property.Type.Name}");
+            builder.Append($"    {property.Name}: {property.Type.Name}");
 
             if (property.IsArray)
             {
