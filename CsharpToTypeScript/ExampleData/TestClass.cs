@@ -7,14 +7,13 @@ public class GenericClass<T1, T2>
     public T1 ValueProperty { get; set; }
 }
 
-[TsGenerate]
 public class GenericConsumer : GenericClass<string, OtherClass>;
 
 public class OtherClass
 {
-    public string ValueProperty { get; set; }
+    public Dictionary<string, int> ValueProperty { get; set; }
+    public Dictionary<TestClass1, string> ValueArrayProperty { get; set; }
 }
-
 
 public class TestClass1
 {
@@ -30,7 +29,6 @@ public class TestClass2
     public List<TestClass1> ObjectListProperty { get; set; }
 }
 
-[TsGenerate]
 public class InheritingClass : BaseClass;
 
 public class BaseClass
@@ -46,8 +44,17 @@ public enum TestEnum1
 }
 
 [TsGenerate]
+public class ClassWithNullableProperty
+{
+    public string? NullableStringProperty { get; set; }
+    public int? NullableIntProperty { get; set; }
+    public TestClass NonNullableObjectProperty  { get; set; }
+    public TestClass? NullableObjectProperty { get; set; }
+}
+
 public class TestClass : ITestInterface
 {
+    public DateTime DateTimeProperty { get; set; }
     public string StringProperty { get; set; }
     public byte ByteProperty { get; set; }
     public sbyte SbyteProperty { get; set; }
@@ -78,7 +85,6 @@ public class TestClass : ITestInterface
     public bool? NullableBoolProperty { get; set; }
 }
 
-[TsGenerate]
 public class SecondTestClass
 {
     // public ArrayItemTestClass TestClassProperty { get; set; }

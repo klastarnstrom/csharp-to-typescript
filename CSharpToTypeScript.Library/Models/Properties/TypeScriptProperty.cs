@@ -1,11 +1,23 @@
 namespace CSharpToTypeScript.Library.Models;
 
-public class TypeScriptProperty(string name, TypeScriptType typeScriptType, bool isArray = false)
+public class TypeScriptProperty
 {
-    public string Name => ToCamelCase(name);
-    public TypeScriptType Type { get; } = typeScriptType;
-    public bool IsArray { get; } = isArray;
+    private readonly string _name;
+    public string Name => ToCamelCase(_name);
+    public TypeScriptType? Type { get; }
+    public bool IsNullable { get; }
+    
+    protected TypeScriptProperty(string name, bool isNullable)
+    {
+        _name = name;
+        IsNullable = isNullable;
+    }
 
+    public TypeScriptProperty(string name, TypeScriptType typeScriptType, bool isNullable) : this(name, isNullable)
+    {
+        Type = typeScriptType;
+    }
+    
     // Convert PascalCase to camelCase
     // Copied from src/libraries/System.Text.Json/Common/JsonCamelCaseNamingPolicy.cs
     private static string ToCamelCase(string propertyName)

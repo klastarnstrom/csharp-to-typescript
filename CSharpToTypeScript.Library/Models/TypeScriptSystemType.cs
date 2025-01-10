@@ -21,7 +21,6 @@ public class TypeScriptSystemType(string name) : TypeScriptType(name)
         { typeof(DateTime), "Date" },
         { typeof(Guid), "string" },
         { typeof(TimeSpan), "string" },
-        { typeof(object), "any" },
         { typeof(char), "string" },
         { typeof(sbyte), "number" },
         { typeof(uint), "number" },

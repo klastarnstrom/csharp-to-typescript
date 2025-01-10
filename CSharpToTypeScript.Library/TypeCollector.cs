@@ -33,7 +33,8 @@ public class TypeCollector(Assembly[] assemblies)
             return new(visited[type], false);
         }
 
-        var isArray = IsArrayOrEnumerable(type);
+        var isDictionary = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+        var isArray = !isDictionary && IsArrayOrEnumerable(type);
         var typeToResolve = isArray ? GetArrayElementType(type) : type;
 
         if (typeof(Delegate).IsAssignableFrom(type))
@@ -95,7 +96,7 @@ public class TypeCollector(Assembly[] assemblies)
 
         var properties = type.GetProperties().Where(p => p.DeclaringType == type && !IsIgnored(p)).ToList();
         var fields = type.GetFields().Where(f => f.DeclaringType == type && !IsIgnored(f)).ToList();
-        
+
         var dataMembers = properties.Cast<MemberInfo>().Concat(fields);
 
         foreach (var dataMember in dataMembers)
@@ -110,7 +111,7 @@ public class TypeCollector(Assembly[] assemblies)
             var isNullable = Nullable.GetUnderlyingType(memberType) is not null || IsMarkedAsNullable(dataMember);
 
             if (CollectReferencedTypes(memberType, visited) is not { } resolvedType) continue;
-            
+
             if (resolvedType.IsArrayElementType)
             {
                 typeScriptType.Properties.Add(new TypeScriptArrayProperty(dataMember.Name,
@@ -140,14 +141,19 @@ public class TypeCollector(Assembly[] assemblies)
         return typeScriptType;
     }
 
-    private static bool IsMarkedAsNullable(MemberInfo memberInfo) => memberInfo switch
+    private static bool IsMarkedAsNullable(MemberInfo memberInfo)
     {
-        PropertyInfo propertyInfo => new NullabilityInfoContext().Create(propertyInfo).WriteState is
-            NullabilityState.Nullable,
-        FieldInfo fieldInfo => new NullabilityInfoContext().Create(fieldInfo).WriteState is NullabilityState
-            .Nullable,
-        _ => throw new InvalidOperationException("Member is not property or field")
-    };
+        var nullabilityContext = new NullabilityInfoContext();
+
+        var nullabilityInfo = memberInfo switch
+        {
+            PropertyInfo propertyInfo => nullabilityContext.Create(propertyInfo),
+            FieldInfo fieldInfo => nullabilityContext.Create(fieldInfo),
+            _ => throw new InvalidOperationException("Member is not property or field")
+        };
+
+        return nullabilityInfo.WriteState is NullabilityState.Nullable;
+    }
 
     private static bool IsSystemType(Type type) => type.Namespace?.StartsWith("System") == true;
 
