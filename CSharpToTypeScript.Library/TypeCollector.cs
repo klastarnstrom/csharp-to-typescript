@@ -105,17 +105,10 @@ public class TypeCollector(Assembly[] assemblies)
 
             if (isDictionary)
             {
-                var keyType = CollectReferencedTypes(memberType.GetGenericArguments()[0], visited);
-                var valueType = CollectReferencedTypes(memberType.GetGenericArguments()[1], visited);
-                
-                if (keyType is null || valueType is null)
-                {
-                    throw new InvalidOperationException("Dictionary key or value type is not supported");
-                }
+                var dictionaryProperty = ResolveDictionaryProperty(memberType, dataMember, isNullable, visited);
 
-                typeScriptType.Properties.Add(new TypeScriptDictionaryProperty(dataMember.Name, keyType.TypeScriptType,
-                    valueType.TypeScriptType, isNullable));
-                
+                typeScriptType.Properties.Add(dictionaryProperty);
+
                 continue;
             }
 
@@ -149,6 +142,29 @@ public class TypeCollector(Assembly[] assemblies)
 
         return typeScriptType;
     }
+
+    private static TypeScriptDictionaryProperty ResolveDictionaryProperty(Type memberType, MemberInfo dataMember,
+        bool isNullable, Dictionary<Type, TypeScriptType> visited)
+    {
+        var keyType = memberType.GetGenericArguments()[0];
+
+        if (!IsValidDictionaryKeyType(keyType))
+        {
+            throw new InvalidOperationException("Dictionary key type is not supported");
+        }
+        
+        var collectedKeyType = CollectReferencedTypes(keyType, visited);
+        var collectedValueType = CollectReferencedTypes(memberType.GetGenericArguments()[1], visited);
+        
+        if (collectedKeyType is null || collectedValueType is null)
+        {
+            throw new InvalidOperationException("Dictionary key or value type is not supported");
+        }
+
+        return new(dataMember.Name, collectedKeyType.TypeScriptType, collectedValueType.TypeScriptType, isNullable);
+    }
+
+    private static bool IsValidDictionaryKeyType(Type keyType) => keyType == typeof(string) || TypeScriptSystemType.NumberTypeMap.ContainsKey(keyType);
 
     private static List<TypeScriptType> CollectGenericArguments(Type type, Dictionary<Type, TypeScriptType> visited)
     {
