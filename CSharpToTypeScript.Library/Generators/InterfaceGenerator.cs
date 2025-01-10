@@ -28,9 +28,7 @@ public class InterfaceGenerator
         
         if (hasBaseType)
         {
-            var baseType = tsInterface.BaseType as TypeScriptInterface;
-            
-            if (baseType is null)
+            if (tsInterface.BaseType is not TypeScriptInterface baseType)
             {
                 throw new InvalidOperationException("Base type is not a TypeScriptInterface");
             }
@@ -73,27 +71,21 @@ public class InterfaceGenerator
             }
         }
 
+        builder.AppendLine(" {");
+        
         if (tsInterface.Properties.Count == 0)
         {
-            builder.AppendLine(" {}");
-            return Task.FromResult(builder.ToString());
+            builder.Append("}");
         }
-        
-        builder.AppendLine(" {");
-
-        foreach (var property in tsInterface.Properties)
+        else
         {
-            builder.Append($"    {property.Name}: {property.Type.Name}");
-
-            if (property.IsArray)
+            foreach (var property in tsInterface.Properties)
             {
-                builder.Append("[]");
+                PropertyGenerator.Generate(builder, property);
             }
 
-            builder.AppendLine(";");
+            builder.AppendLine("}");
         }
-
-        builder.AppendLine("}");
         
         return Task.FromResult(builder.ToString());
     }
