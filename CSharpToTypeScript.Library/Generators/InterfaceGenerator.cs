@@ -3,7 +3,7 @@ using CSharpToTypeScript.Library.Models;
 
 namespace CSharpToTypeScript.Library.Generators;
 
-public class InterfaceGenerator
+public static class InterfaceGenerator
 {
     public static Task<string> Generate(TypeScriptInterface tsInterface)
     {
@@ -70,22 +70,8 @@ public class InterfaceGenerator
                 }
             }
         }
-
-        builder.AppendLine(" {");
         
-        if (tsInterface.Properties.Count == 0)
-        {
-            builder.Append("}");
-        }
-        else
-        {
-            foreach (var property in tsInterface.Properties)
-            {
-                PropertyGenerator.Generate(builder, property);
-            }
-
-            builder.AppendLine("}");
-        }
+        BodyGenerator.Generate(builder, tsInterface.Properties);
         
         return Task.FromResult(builder.ToString());
     }
