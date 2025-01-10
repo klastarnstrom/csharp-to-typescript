@@ -93,27 +93,23 @@ public class TypeCollector(Assembly[] assemblies)
             }
         }
 
-        var properties = type.GetProperties().Where(p => p.DeclaringType == type && !IsIgnored(p));
+        var properties = type.GetProperties().Where(p => p.DeclaringType == type && !IsIgnored(p)).ToList();
+        var fields = type.GetFields().Where(f => f.DeclaringType == type && !IsIgnored(f)).ToList();
+        
+        var dataMembers = properties.Cast<MemberInfo>().Concat(fields);
 
-        foreach (var property in properties)
+        foreach (var dataMember in dataMembers)
         {
-            if (CollectReferencedTypes(property.PropertyType, visited) is { } resolvedType)
+            var memberType = dataMember switch
             {
-                typeScriptType.Properties.Add(new(property.Name, resolvedType.TypeScriptType,
-                    resolvedType.IsArrayElementType));
-            }
-        }
-
-        var fields = type.GetFields().Where(f =>
-            f.DeclaringType == type && !IsIgnored(f));
-
-        foreach (var field in fields)
-        {
-            var resolvedType = CollectReferencedTypes(field.FieldType, visited);
-
-            if (resolvedType is not null)
+                PropertyInfo propertyInfo => propertyInfo.PropertyType,
+                FieldInfo fieldInfo => fieldInfo.FieldType,
+                _ => throw new InvalidOperationException("Member is not a property or field")
+            };
+            
+            if (CollectReferencedTypes(memberType, visited) is { } resolvedType)
             {
-                typeScriptType.Properties.Add(new(field.Name, resolvedType.TypeScriptType,
+                typeScriptType.Properties.Add(new(dataMember.Name, resolvedType.TypeScriptType,
                     resolvedType.IsArrayElementType));
             }
         }
