@@ -9,10 +9,11 @@ public class GenericClass<T1, T2>
 
 public class GenericConsumer : GenericClass<string, OtherClass>;
 
+
+[TsGenerate]
 public class OtherClass
 {
     public Dictionary<string, int> ValueProperty { get; set; }
-    public Dictionary<TestClass1, string> ValueArrayProperty { get; set; }
 }
 
 public class TestClass1
@@ -43,7 +44,6 @@ public enum TestEnum1
     Value3
 }
 
-[TsGenerate]
 public class ClassWithNullableProperty
 {
     public string? NullableStringProperty { get; set; }

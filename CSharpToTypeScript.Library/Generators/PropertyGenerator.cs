@@ -17,13 +17,17 @@ public static class PropertyGenerator
 
         builder.Append(": ");
 
-        if (property is TypeScriptArrayProperty arrayProperty)
+        switch (property)
         {
-            builder.Append($"{arrayProperty.ElementType.Name}[]");
-        }
-        else
-        {
-            builder.Append($"{property.Type?.Name}");
+            case TypeScriptArrayProperty arrayProperty:
+                builder.Append($"{arrayProperty.ElementType.Name}[]");
+                break;
+            case TypeScriptDictionaryProperty dictionaryProperty:
+                builder.Append($"{{ [key: {dictionaryProperty.KeyType.Name}]: {dictionaryProperty.ValueType.Name} }}");
+                break;
+            default:
+                builder.Append($"{property.Type?.Name}");
+                break;
         }
 
         builder.AppendLine(";");

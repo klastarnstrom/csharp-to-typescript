@@ -82,17 +82,7 @@ public class TypeCollector(Assembly[] assemblies)
                 CollectReferencedTypes(openType, visited);
             }
 
-            foreach (var genericTypeArgument in type.GetGenericArguments())
-            {
-                if (genericTypeArgument.IsGenericTypeParameter)
-                {
-                    typeScriptType.GenericArguments.Add(new TypeScriptGenericParameter(genericTypeArgument.Name));
-                }
-                else if (CollectReferencedTypes(genericTypeArgument, visited) is { } resolvedType)
-                {
-                    typeScriptType.GenericArguments.Add(resolvedType.TypeScriptType);
-                }
-            }
+            typeScriptType.GenericArguments.AddRange(CollectGenericArguments(type, visited));
         }
 
         var properties = type.GetProperties().Where(p => p.DeclaringType == type && !IsIgnored(p)).ToList();
@@ -110,6 +100,24 @@ public class TypeCollector(Assembly[] assemblies)
             };
 
             var isNullable = Nullable.GetUnderlyingType(memberType) is not null || IsMarkedAsNullable(dataMember);
+            var isDictionary = memberType.IsGenericType &&
+                               memberType.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+
+            if (isDictionary)
+            {
+                var keyType = CollectReferencedTypes(memberType.GetGenericArguments()[0], visited);
+                var valueType = CollectReferencedTypes(memberType.GetGenericArguments()[1], visited);
+                
+                if (keyType is null || valueType is null)
+                {
+                    throw new InvalidOperationException("Dictionary key or value type is not supported");
+                }
+
+                typeScriptType.Properties.Add(new TypeScriptDictionaryProperty(dataMember.Name, keyType.TypeScriptType,
+                    valueType.TypeScriptType, isNullable));
+                
+                continue;
+            }
 
             if (CollectReferencedTypes(memberType, visited) is not { } resolvedType) continue;
 
@@ -140,6 +148,25 @@ public class TypeCollector(Assembly[] assemblies)
         visited.TryAdd(type, typeScriptType);
 
         return typeScriptType;
+    }
+
+    private static List<TypeScriptType> CollectGenericArguments(Type type, Dictionary<Type, TypeScriptType> visited)
+    {
+        var genericArguments = new List<TypeScriptType>();
+
+        foreach (var genericTypeArgument in type.GetGenericArguments())
+        {
+            if (genericTypeArgument.IsGenericTypeParameter)
+            {
+                genericArguments.Add(new TypeScriptGenericParameter(genericTypeArgument.Name));
+            }
+            else if (CollectReferencedTypes(genericTypeArgument, visited) is { } resolvedType)
+            {
+                genericArguments.Add(resolvedType.TypeScriptType);
+            }
+        }
+
+        return genericArguments;
     }
 
     private static bool IsMarkedAsNullable(MemberInfo memberInfo)
