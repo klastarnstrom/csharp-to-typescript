@@ -41,7 +41,7 @@ public class TypeCollector(Assembly[] assemblies)
             return null;
         }
 
-        if (IsSystemType(typeToResolve))
+        if (typeToResolve.IsValueType || typeToResolve == typeof(string))
         {
             return new(TypeScriptSystemType.Create(typeToResolve), true, isArray);
         }
@@ -106,11 +106,19 @@ public class TypeCollector(Assembly[] assemblies)
                 FieldInfo fieldInfo => fieldInfo.FieldType,
                 _ => throw new InvalidOperationException("Member is not a property or field")
             };
+
+            var isNullable = Nullable.GetUnderlyingType(memberType) is not null || IsMarkedAsNullable(dataMember);
+
+            if (CollectReferencedTypes(memberType, visited) is not { } resolvedType) continue;
             
-            if (CollectReferencedTypes(memberType, visited) is { } resolvedType)
+            if (resolvedType.IsArrayElementType)
             {
-                typeScriptType.Properties.Add(new(dataMember.Name, resolvedType.TypeScriptType,
-                    resolvedType.IsArrayElementType));
+                typeScriptType.Properties.Add(new TypeScriptArrayProperty(dataMember.Name,
+                    resolvedType.TypeScriptType, isNullable));
+            }
+            else
+            {
+                typeScriptType.Properties.Add(new(dataMember.Name, resolvedType.TypeScriptType, isNullable));
             }
         }
 
@@ -131,6 +139,15 @@ public class TypeCollector(Assembly[] assemblies)
 
         return typeScriptType;
     }
+
+    private static bool IsMarkedAsNullable(MemberInfo memberInfo) => memberInfo switch
+    {
+        PropertyInfo propertyInfo => new NullabilityInfoContext().Create(propertyInfo).WriteState is
+            NullabilityState.Nullable,
+        FieldInfo fieldInfo => new NullabilityInfoContext().Create(fieldInfo).WriteState is NullabilityState
+            .Nullable,
+        _ => throw new InvalidOperationException("Member is not property or field")
+    };
 
     private static bool IsSystemType(Type type) => type.Namespace?.StartsWith("System") == true;
 
