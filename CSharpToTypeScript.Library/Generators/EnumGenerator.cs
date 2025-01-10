@@ -1,4 +1,3 @@
-using System.Text;
 using CSharpToTypeScript.Library.Constants;
 using CSharpToTypeScript.Library.Models;
 
@@ -6,19 +5,19 @@ namespace CSharpToTypeScript.Library.Generators;
 
 internal static class EnumGenerator
 {
-    public static Task<string> Generate(TypeScriptEnum typeScriptEnum)
+    public static async Task<string> Generate(TypeScriptEnum typeScriptEnum)
     {
-        var sb = new StringBuilder();
+        var writer = new TypeScriptStringWriter();
 
-        sb.AppendLine($"export enum {typeScriptEnum.Name} {{");
+        await writer.WriteLineAsync($"enum {typeScriptEnum.Name} {{");
 
         foreach (var value in typeScriptEnum.EnumValues)
         {
-            sb.AppendLine($"{SpecialCharacters.Tab}{value} = \"{value}\",");
+            await writer.WriteLineAsync($"{SpecialCharacters.Tab}{value} = \"{value}\",");
         }
 
-        sb.AppendLine("}");
+        await writer.WriteAsync("}");
 
-        return Task.FromResult(sb.ToString());
+        return writer.ToString();
     }
 }

@@ -27,7 +27,7 @@ public class EnumTests
     public void Resolve_EnumType_Returns_TypeScript_Enum_With_Correct_Enum_Values()
     {
         // Arrange
-        var assembly = Assembly.GetExecutingAssembly();
+        var assembly = typeof(TestEnum).Assembly;
         var collector = new TypeCollector([assembly]);
 
         // Act

@@ -5,11 +5,14 @@ namespace CSharpToTypeScript.Library.Generators;
 
 public static class InterfaceGenerator
 {
-    public static Task<string> Generate(TypeScriptInterface tsInterface)
+    public static async Task<string> Generate(TypeScriptInterface tsInterface)
     {
-        var builder = new StringBuilder();
+        var writer = new TypeScriptStringWriter
+        {
+            NewLine = "\n"
+        };
 
-        builder.Append($"export interface {tsInterface.Name}");
+        await writer.WriteAsync($"interface {tsInterface.Name}");
 
         var hasBaseType = tsInterface.BaseType != null;
         var hasImplementedInterfaces = tsInterface.ImplementedInterfaces.Count != 0;
@@ -18,12 +21,12 @@ public static class InterfaceGenerator
         
         if (hasGenericArguments)
         {
-            builder.Append(GenerateGenericArguments(tsInterface));
+            await writer.WriteAsync(GenerateGenericArguments(tsInterface));
         }
         
         if (hasInheritance)
         {
-            builder.Append(" extends ");
+            await writer.WriteAsync(" extends ");
         }
         
         if (hasBaseType)
@@ -33,17 +36,17 @@ public static class InterfaceGenerator
                 throw new InvalidOperationException("Base type is not a TypeScriptInterface");
             }
             
-            builder.Append($"{baseType.Name}");
+            await writer.WriteAsync($"{baseType.Name}");
             
             if (baseType.GenericArguments.Count != 0)
             {
-                builder.Append(GenerateGenericArguments(baseType));
+                await writer.WriteAsync(GenerateGenericArguments(baseType));
             }
         }
         
         if (hasBaseType && hasImplementedInterfaces)
         {
-            builder.Append(", ");
+            await writer.WriteAsync(", ");
         }
 
         if (hasImplementedInterfaces)
@@ -57,23 +60,23 @@ public static class InterfaceGenerator
                     throw new InvalidOperationException("Implemented interface is not a TypeScriptInterface");
                 }
                 
-                builder.Append(implementedInterface.Name);
+                await writer.WriteAsync(implementedInterface.Name);
                 
                 if (implementedInterface.GenericArguments.Count != 0)
                 {
-                    builder.Append(GenerateGenericArguments(implementedInterface));
+                    await writer.WriteAsync(GenerateGenericArguments(implementedInterface));
                 }
 
                 if (i != tsInterface.ImplementedInterfaces.Count - 1)
                 {
-                    builder.Append(", ");
+                    await writer.WriteAsync(", ");
                 }
             }
         }
         
-        BodyGenerator.Generate(builder, tsInterface.Properties);
-        
-        return Task.FromResult(builder.ToString());
+        await BodyGenerator.Generate(writer, tsInterface.Properties);
+
+        return writer.ToString();
     }
 
     private static string GenerateGenericArguments(TypeScriptInterface tsInterface)

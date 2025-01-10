@@ -17,7 +17,11 @@ public class TypeScriptWriter : IAsyncDisposable
 
         var filePath = Path.Combine(configuration.OutputPath, configuration.FileName);
 
-        _writer = new(filePath);
+        _writer = new(filePath)
+        {
+            NewLine = "\n"
+        };
+
         _configuration = configuration;
     }
 
@@ -30,16 +34,15 @@ public class TypeScriptWriter : IAsyncDisposable
 
         foreach (var (_, typeScriptType) in typeScriptTypes)
         {
-            switch (typeScriptType)
+            var typeString = typeScriptType switch
             {
-                case TypeScriptEnum tsEnum:
-                    await _writer.WriteLineAsync(await EnumGenerator.Generate(tsEnum));
-                    break;
-                // Closed generic type should only be used for property values
-                case TypeScriptInterface tsInterface and ({ IsGeneric: false, IsGenericParameter: false } or { IsOpenGenericType: true }):
-                    await _writer.WriteLineAsync(await InterfaceGenerator.Generate(tsInterface));
-                    break;
-            }
+                TypeScriptEnum tsEnum => await EnumGenerator.Generate(tsEnum),
+                TypeScriptInterface tsInterface and ({ IsGeneric: false, IsGenericParameter: false } or
+                    { IsOpenGenericType: true }) => await InterfaceGenerator.Generate(tsInterface),
+                _ => throw new ArgumentOutOfRangeException(nameof(typeScriptType))
+            };
+
+            await _writer.WriteLineAsync($"export {typeString}");
         }
     }
 

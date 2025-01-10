@@ -1,26 +1,23 @@
-using System.Text;
 using CSharpToTypeScript.Library.Models.Properties;
 
 namespace CSharpToTypeScript.Library.Generators;
 
 public static class BodyGenerator
 {
-    public static void Generate(StringBuilder builder, List<TypeScriptProperty> properties)
+    public static async Task Generate(StringWriter writer, List<TypeScriptProperty> properties)
     {
-        builder.AppendLine(" {");
+        await writer.WriteAsync(" {");
         
-        if (properties.Count == 0)
+        if (properties.Count > 0)
         {
-            builder.Append("}");
-        }
-        else
-        {
+            await writer.WriteLineAsync();
+            
             foreach (var property in properties)
             {
-                PropertyGenerator.Generate(builder, property);
+               await PropertyGenerator.Generate(writer, property);
             }
-
-            builder.AppendLine("}");
         }
+
+        await writer.WriteAsync("}");
     }
 }
