@@ -1,6 +1,7 @@
 using System.Reflection;
 using CSharpToTypeScript.Library.Attributes;
 using CSharpToTypeScript.Library.Models;
+using CSharpToTypeScript.Library.Models.Properties;
 
 namespace CSharpToTypeScript.Library;
 

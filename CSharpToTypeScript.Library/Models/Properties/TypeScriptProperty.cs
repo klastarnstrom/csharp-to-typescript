@@ -1,4 +1,4 @@
-namespace CSharpToTypeScript.Library.Models;
+namespace CSharpToTypeScript.Library.Models.Properties;
 
 public class TypeScriptProperty
 {

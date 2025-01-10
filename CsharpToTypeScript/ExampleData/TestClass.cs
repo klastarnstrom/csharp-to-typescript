@@ -1,6 +1,6 @@
 using CSharpToTypeScript.Library.Attributes;
 
-namespace CsharpToTypeScript.ExampleData;
+namespace CSharpToTypeScript.ExampleData;
 
 public class GenericClass<T1, T2>
 {

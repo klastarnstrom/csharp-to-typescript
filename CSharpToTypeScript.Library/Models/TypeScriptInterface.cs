@@ -1,3 +1,5 @@
+using CSharpToTypeScript.Library.Models.Properties;
+
 namespace CSharpToTypeScript.Library.Models;
 
 public class TypeScriptInterface(string name) : TypeScriptType(name)

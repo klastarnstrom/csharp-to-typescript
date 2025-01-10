@@ -1,6 +1,6 @@
 using System.Text;
 using CSharpToTypeScript.Library.Constants;
-using CSharpToTypeScript.Library.Models;
+using CSharpToTypeScript.Library.Models.Properties;
 
 namespace CSharpToTypeScript.Library.Generators;
 
