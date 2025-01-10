@@ -1,4 +1,5 @@
 using System.Text;
+using CSharpToTypeScript.Library.Constants;
 using CSharpToTypeScript.Library.Models;
 
 namespace CSharpToTypeScript.Library.Generators;
@@ -13,7 +14,7 @@ internal static class EnumGenerator
 
         foreach (var value in typeScriptEnum.EnumValues)
         {
-            sb.AppendLine($"    {value} = \"{value}\",");
+            sb.AppendLine($"{SpecialCharacters.Tab}{value} = \"{value}\",");
         }
 
         sb.AppendLine("}");
