@@ -11,7 +11,12 @@ public class TypeScriptWriter : IAsyncDisposable
 
     public TypeScriptWriter(TypeScriptConfiguration configuration)
     {
+        var outputDirectory = new DirectoryInfo(configuration.OutputPath);
+
+        Directory.CreateDirectory(outputDirectory.FullName);
+
         var filePath = Path.Combine(configuration.OutputPath, configuration.FileName);
+
         _writer = new(filePath);
         _configuration = configuration;
     }
@@ -30,13 +35,14 @@ public class TypeScriptWriter : IAsyncDisposable
                 case TypeScriptEnum tsEnum:
                     await _writer.WriteLineAsync(await EnumGenerator.Generate(tsEnum));
                     break;
-                case TypeScriptInterface tsInterface:
+                // Closed generic type should only be used for property values
+                case TypeScriptInterface tsInterface and ({ IsGeneric: false, IsGenericParameter: false } or { IsOpenGenericType: true }):
                     await _writer.WriteLineAsync(await InterfaceGenerator.Generate(tsInterface));
                     break;
             }
         }
     }
-    
+
     private async Task Comment(string comment)
     {
         await _writer.WriteLineAsync($"{SpecialCharacters.SingleLineComment} {comment}");

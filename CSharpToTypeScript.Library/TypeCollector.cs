@@ -75,13 +75,31 @@ public class TypeCollector(Assembly[] assemblies)
         var typeScriptType = new TypeScriptInterface
         {
             Name = type.Name,
+            IsOpenGenericType = type.IsGenericTypeDefinition,
+            IsGenericParameter = type.IsGenericParameter,
         };
 
         if (type.IsGenericType)
         {
+            var openType = type.GetGenericTypeDefinition();
+
+            if (openType != type)
+            {
+                CollectReferencedTypes(openType, visited);
+            }
+
+            typeScriptType.Name = type.Name.Split('`')[0];
+
             foreach (var genericTypeArgument in type.GetGenericArguments())
             {
-                if (CollectReferencedTypes(genericTypeArgument, visited) is { } resolvedType)
+                if (genericTypeArgument.IsGenericTypeParameter)
+                {
+                    typeScriptType.GenericArguments.Add(new TypeScriptGenericParameter
+                    {
+                        Name = genericTypeArgument.Name,
+                    });
+                }
+                else if (CollectReferencedTypes(genericTypeArgument, visited) is { } resolvedType)
                 {
                     typeScriptType.GenericArguments.Add(resolvedType.TypeScriptType);
                 }

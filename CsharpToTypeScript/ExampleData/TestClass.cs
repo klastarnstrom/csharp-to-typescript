@@ -2,7 +2,20 @@ using CSharpToTypeScript.Library.Attributes;
 
 namespace CsharpToTypeScript.ExampleData;
 
+public class GenericClass<T1, T2>
+{
+    public T1 ValueProperty { get; set; }
+}
+
 [TsGenerate]
+public class GenericConsumer : GenericClass<string, OtherClass>;
+
+public class OtherClass
+{
+    public string ValueProperty { get; set; }
+}
+
+
 public class TestClass1
 {
     public string ValueProperty { get; set; }
@@ -10,7 +23,6 @@ public class TestClass1
     public TestEnum1 EnumProperty { get; set; }
 }
 
-[TsGenerate]
 public class TestClass2
 {
     public TestClass1 ObjectProperty { get; set; }
@@ -18,7 +30,6 @@ public class TestClass2
     public List<TestClass1> ObjectListProperty { get; set; }
 }
 
-[TsGenerate]
 public class InheritingClass : BaseClass;
 
 public class BaseClass
