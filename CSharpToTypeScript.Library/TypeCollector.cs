@@ -43,7 +43,7 @@ public class TypeCollector(Assembly[] assemblies)
             return null;
         }
 
-        if (typeToResolve.IsValueType || typeToResolve == typeof(string))
+        if (typeToResolve is { IsEnum: false, IsValueType: true } || typeToResolve == typeof(string))
         {
             return new(TypeScriptSystemType.Create(typeToResolve), true, isArray);
         }
