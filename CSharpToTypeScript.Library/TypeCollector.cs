@@ -7,7 +7,7 @@ namespace CSharpToTypeScript.Library;
 
 public class TypeCollector(Assembly[] assemblies)
 {
-    public Task<Dictionary<Type, TypeScriptType>> Resolve()
+    public Task<Dictionary<Type, TypeScriptType>> Collect()
     {
         var typesWithAttribute = assemblies
             .SelectMany(assembly => assembly.GetTypes())
