@@ -17,12 +17,7 @@ public static class InterfaceGenerator
         var hasBaseType = tsInterface.BaseType != null;
         var hasImplementedInterfaces = tsInterface.ImplementedInterfaces.Count != 0;
         var hasInheritance = hasBaseType || hasImplementedInterfaces;
-        var hasGenericArguments = tsInterface.GenericArguments.Count != 0;
-        
-        if (hasGenericArguments)
-        {
-            await writer.WriteAsync(GenerateGenericArguments(tsInterface));
-        }
+
         
         if (hasInheritance)
         {
@@ -36,12 +31,7 @@ public static class InterfaceGenerator
                 throw new InvalidOperationException("Base type is not a TypeScriptInterface");
             }
             
-            await writer.WriteAsync($"{baseType.Name}");
-            
-            if (baseType.GenericArguments.Count != 0)
-            {
-                await writer.WriteAsync(GenerateGenericArguments(baseType));
-            }
+            await TypeNameGenerator.Generate(writer, baseType);
         }
         
         if (hasBaseType && hasImplementedInterfaces)
@@ -60,12 +50,7 @@ public static class InterfaceGenerator
                     throw new InvalidOperationException("Implemented interface is not a TypeScriptInterface");
                 }
                 
-                await writer.WriteAsync(implementedInterface.Name);
-                
-                if (implementedInterface.GenericArguments.Count != 0)
-                {
-                    await writer.WriteAsync(GenerateGenericArguments(implementedInterface));
-                }
+                await TypeNameGenerator.Generate(writer, implementedInterface);
 
                 if (i != tsInterface.ImplementedInterfaces.Count - 1)
                 {
