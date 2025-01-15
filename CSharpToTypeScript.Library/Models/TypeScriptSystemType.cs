@@ -4,12 +4,13 @@ namespace CSharpToTypeScript.Library.Models;
 
 public class TypeScriptSystemType(string name) : TypeScriptType(name)
 {
-    public string TypeName { get; } = name;
-
     private static readonly ReadOnlyDictionary<Type, string> TypeMap = new(new Dictionary<Type, string>
     {
-        { typeof(DateTime), "Date" },
-        { typeof(Guid), "string" },
+        { typeof(DateTime), "DateTimeString" },
+        { typeof(DateTime?), "DateTimeString" },
+        { typeof(DateOnly), "DateString" },
+        { typeof(DateOnly?), "DateString" },
+        { typeof(Guid), "Guid" },
         { typeof(TimeSpan), "string" },
         { typeof(bool), "boolean" },
         { typeof(bool?), "boolean" },
