@@ -13,6 +13,11 @@ public static class InterfaceGenerator
         };
 
         await writer.WriteAsync($"interface {tsInterface.Name}");
+        var writer = new TypeScriptStringWriter();
+        
+        await writer.WriteAsync("interface ");
+
+        await TypeNameGenerator.Generate(writer, tsInterface);
 
         var hasBaseType = tsInterface.BaseType != null;
         var hasImplementedInterfaces = tsInterface.ImplementedInterfaces.Count != 0;
@@ -64,24 +69,6 @@ public static class InterfaceGenerator
         return writer.ToString();
     }
 
-    private static string GenerateGenericArguments(TypeScriptInterface tsInterface)
-    {
-        if (tsInterface.GenericArguments.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        var builder = new StringBuilder("<");
-
-        for (var i = 0; i < tsInterface.GenericArguments.Count; i++)
-        {
-            builder.Append(tsInterface.GenericArguments[i].Name);
-
-            if (i != tsInterface.GenericArguments.Count - 1)
-            {
-                builder.Append(", ");
-            }
-        }
 
         builder.Append(">");
 
