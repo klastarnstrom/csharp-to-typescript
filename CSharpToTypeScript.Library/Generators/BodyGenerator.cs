@@ -15,6 +15,7 @@ public static class BodyGenerator
             foreach (var property in properties)
             {
                await PropertyGenerator.Generate(writer, property);
+               await writer.WriteLineAsync();
             }
         }
 
