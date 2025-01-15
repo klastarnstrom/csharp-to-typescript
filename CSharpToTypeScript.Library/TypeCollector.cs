@@ -7,7 +7,9 @@ namespace CSharpToTypeScript.Library;
 
 public class TypeCollector(Assembly[] assemblies)
 {
-    public Task<Dictionary<Type, TypeScriptType>> Collect()
+    private readonly ConcurrentDictionary<Type, TypeScriptType> _visited = new();
+
+    public Task<ConcurrentDictionary<Type, TypeScriptType>> Collect()
     {
         var typesWithAttribute = assemblies
             .SelectMany(assembly => assembly.GetTypes())
@@ -15,23 +17,21 @@ public class TypeCollector(Assembly[] assemblies)
             .Where(type => !type.IsNotPublic && Attribute.IsDefined(type, typeof(TsGenerateAttribute)))
             .ToHashSet();
 
-        var visitedTypes = new Dictionary<Type, TypeScriptType>();
-
         foreach (var type in typesWithAttribute)
         {
-            CollectReferencedTypes(type, visitedTypes);
+            CollectReferencedTypes(type);
         }
 
-        return Task.FromResult(visitedTypes);
+        return Task.FromResult(_visited);
     }
 
-    private static CollectedTypeResult? CollectReferencedTypes(Type type, Dictionary<Type, TypeScriptType> visited)
+    private CollectedTypeResult? CollectReferencedTypes(Type type)
     {
-        var typeAlreadyVisited = visited.ContainsKey(type);
+        var typeAlreadyVisited = _visited.ContainsKey(type);
 
         if (typeAlreadyVisited)
         {
-            return new(visited[type], false);
+            return new(_visited[type], false);
         }
 
         var isDictionary = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
@@ -64,13 +64,13 @@ public class TypeCollector(Assembly[] assemblies)
 
         if (typeToResolve.IsInterface || typeToResolve.IsClass)
         {
-            return new(ResolveInterface(typeToResolve, visited), isArray);
+            return new(ResolveInterface(typeToResolve), isArray);
         }
 
         throw new ArgumentException("Type is not supported", nameof(type));
     }
 
-    private static TypeScriptInterface ResolveInterface(Type type, Dictionary<Type, TypeScriptType> visited)
+    private TypeScriptInterface ResolveInterface(Type type)
     {
         var typeScriptType = new TypeScriptInterface(type.IsGenericType ? type.Name.Split('`')[0] : type.Name)
         {
@@ -84,10 +84,10 @@ public class TypeCollector(Assembly[] assemblies)
 
             if (openType != type)
             {
-                CollectReferencedTypes(openType, visited);
+                CollectReferencedTypes(openType);
             }
 
-            typeScriptType.GenericArguments.AddRange(CollectGenericArguments(type, visited));
+            typeScriptType.GenericArguments.AddRange(CollectGenericArguments(type));
         }
 
         var properties = type.GetProperties().Where(p => p.DeclaringType == type && !IsIgnored(p)).ToList();
@@ -110,14 +110,14 @@ public class TypeCollector(Assembly[] assemblies)
 
             if (isDictionary)
             {
-                var dictionaryProperty = ResolveDictionaryProperty(memberType, dataMember, isNullable, visited);
+                var dictionaryProperty = ResolveDictionaryProperty(memberType, dataMember, isNullable);
 
                 typeScriptType.Properties.Add(dictionaryProperty);
 
                 continue;
             }
 
-            if (CollectReferencedTypes(memberType, visited) is not { } resolvedType) continue;
+            if (CollectReferencedTypes(memberType) is not { } resolvedType) continue;
 
             if (resolvedType.IsArrayElementType)
             {
@@ -132,12 +132,12 @@ public class TypeCollector(Assembly[] assemblies)
 
         if (type.BaseType != null && !IsSystemType(type.BaseType))
         {
-            typeScriptType.BaseType = CollectReferencedTypes(type.BaseType, visited)?.TypeScriptType;
+            typeScriptType.BaseType = CollectReferencedTypes(type.BaseType)?.TypeScriptType;
         }
 
         foreach (var implementedInterface in type.GetInterfaces().Where(implInterface => !IsSystemType(implInterface)))
         {
-            if (CollectReferencedTypes(implementedInterface, visited) is { IsSystemType: false } resolvedType)
+            if (CollectReferencedTypes(implementedInterface) is { IsSystemType: false } resolvedType)
             {
                 typeScriptType.ImplementedInterfaces.Add(resolvedType.TypeScriptType);
             }
@@ -148,8 +148,8 @@ public class TypeCollector(Assembly[] assemblies)
         return typeScriptType;
     }
 
-    private static TypeScriptDictionaryProperty ResolveDictionaryProperty(Type memberType, MemberInfo dataMember,
-        bool isNullable, Dictionary<Type, TypeScriptType> visited)
+    private TypeScriptDictionaryProperty ResolveDictionaryProperty(Type memberType, MemberInfo dataMember,
+        bool isNullable)
     {
         var keyType = memberType.GetGenericArguments()[0];
 
@@ -157,10 +157,10 @@ public class TypeCollector(Assembly[] assemblies)
         {
             throw new InvalidOperationException("Dictionary key type is not supported");
         }
-        
-        var collectedKeyType = CollectReferencedTypes(keyType, visited);
-        var collectedValueType = CollectReferencedTypes(memberType.GetGenericArguments()[1], visited);
-        
+
+        var collectedKeyType = CollectReferencedTypes(keyType);
+        var collectedValueType = CollectReferencedTypes(memberType.GetGenericArguments()[1]);
+
         if (collectedKeyType is null || collectedValueType is null)
         {
             throw new InvalidOperationException("Dictionary key or value type is not supported");
@@ -169,9 +169,10 @@ public class TypeCollector(Assembly[] assemblies)
         return new(dataMember.Name, collectedKeyType.TypeScriptType, collectedValueType.TypeScriptType, isNullable);
     }
 
-    private static bool IsValidDictionaryKeyType(Type keyType) => keyType == typeof(string) || TypeScriptSystemType.NumberTypeMap.ContainsKey(keyType);
+    private static bool IsValidDictionaryKeyType(Type keyType) =>
+        keyType == typeof(string) || TypeScriptSystemType.NumberTypeMap.ContainsKey(keyType);
 
-    private static List<TypeScriptType> CollectGenericArguments(Type type, Dictionary<Type, TypeScriptType> visited)
+    private List<TypeScriptType> CollectGenericArguments(Type type)
     {
         var genericArguments = new List<TypeScriptType>();
 
@@ -181,7 +182,7 @@ public class TypeCollector(Assembly[] assemblies)
             {
                 genericArguments.Add(new TypeScriptGenericParameter(genericTypeArgument.Name));
             }
-            else if (CollectReferencedTypes(genericTypeArgument, visited) is { } resolvedType)
+            else if (CollectReferencedTypes(genericTypeArgument) is { } resolvedType)
             {
                 genericArguments.Add(resolvedType.TypeScriptType);
             }
