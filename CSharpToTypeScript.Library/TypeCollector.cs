@@ -43,6 +43,11 @@ public class TypeCollector(Assembly[] assemblies)
             return null;
         }
 
+        if (typeToResolve == typeof(IEquatable<>))
+        {
+            return null;
+        }
+
         if (typeToResolve is { IsEnum: false, IsValueType: true } || typeToResolve == typeof(string))
         {
             return new(TypeScriptSystemType.Create(typeToResolve), true, isArray);
@@ -130,7 +135,7 @@ public class TypeCollector(Assembly[] assemblies)
             typeScriptType.BaseType = CollectReferencedTypes(type.BaseType, visited)?.TypeScriptType;
         }
 
-        foreach (var implementedInterface in type.GetInterfaces())
+        foreach (var implementedInterface in type.GetInterfaces().Where(implInterface => !IsSystemType(implInterface)))
         {
             if (CollectReferencedTypes(implementedInterface, visited) is { IsSystemType: false } resolvedType)
             {
