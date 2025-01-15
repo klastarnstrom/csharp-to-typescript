@@ -31,6 +31,10 @@ public class TypeScriptWriter : IAsyncDisposable
         ClearFile();
 
         await Comment($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        
+        await BuiltInTypesGenerator.Generate(_writer);
+
+        await EmptyLine();
 
         foreach (var (_, typeScriptType) in typeScriptTypes)
         {
@@ -43,12 +47,19 @@ public class TypeScriptWriter : IAsyncDisposable
             {
                 await _writer.WriteLineAsync($"export {await EnumGenerator.Generate(tsEnum)}");
             }
+            
+            await EmptyLine();
         }
     }
 
     private async Task Comment(string comment)
     {
         await _writer.WriteLineAsync($"{SpecialCharacters.SingleLineComment} {comment}");
+    }
+    
+    private async Task EmptyLine()
+    {
+        await _writer.WriteLineAsync();
     }
 
     private void ClearFile()
