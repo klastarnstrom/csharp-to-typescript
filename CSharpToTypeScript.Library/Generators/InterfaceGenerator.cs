@@ -42,9 +42,7 @@ public static class InterfaceGenerator
         {
             for (var i = 0; i < tsInterface.ImplementedInterfaces.Count; i++)
             {
-                var implementedInterface = tsInterface.ImplementedInterfaces[i] as TypeScriptInterface;
-                
-                if (implementedInterface is null)
+                if (tsInterface.ImplementedInterfaces[i] is not TypeScriptInterface implementedInterface)
                 {
                     throw new InvalidOperationException("Implemented interface is not a TypeScriptInterface");
                 }
