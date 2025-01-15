@@ -64,8 +64,4 @@ public static class InterfaceGenerator
     }
 
 
-        builder.Append(">");
-
-        return builder.ToString();
-    }
 }
