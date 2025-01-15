@@ -19,17 +19,23 @@ public static class PropertyGenerator
         switch (property)
         {
             case TypeScriptArrayProperty arrayProperty:
-                await writer.WriteAsync($"{arrayProperty.ElementType.Name}[]");
+                await GenerateWriteArrayType(writer, arrayProperty);
                 break;
             case TypeScriptDictionaryProperty dictionaryProperty:
                 await GenerateDictionaryType(writer, dictionaryProperty);
                 break;
             default:
-                await writer.WriteAsync($"{property.Type?.Name}");
+                await TypeNameGenerator.Generate(writer, property.Type ?? throw new InvalidOperationException());
                 break;
         }
 
         await writer.WriteAsync(";");
+    }
+
+    private static async Task GenerateWriteArrayType(StringWriter writer, TypeScriptArrayProperty arrayProperty)
+    {
+        await TypeNameGenerator.Generate(writer, arrayProperty.ElementType);
+        await writer.WriteAsync("[]");
     }
 
     private static async Task GenerateDictionaryType(StringWriter writer,
