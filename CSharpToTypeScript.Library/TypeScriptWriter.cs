@@ -34,15 +34,15 @@ public class TypeScriptWriter : IAsyncDisposable
 
         foreach (var (_, typeScriptType) in typeScriptTypes)
         {
-            var typeString = typeScriptType switch
+            if (typeScriptType is TypeScriptInterface tsInterface
+                and ({ IsGeneric: false, IsGenericParameter: false } or { IsOpenGenericType: true }))
             {
-                TypeScriptEnum tsEnum => await EnumGenerator.Generate(tsEnum),
-                TypeScriptInterface tsInterface and ({ IsGeneric: false, IsGenericParameter: false } or
-                    { IsOpenGenericType: true }) => await InterfaceGenerator.Generate(tsInterface),
-                _ => throw new ArgumentOutOfRangeException(nameof(typeScriptType))
-            };
-
-            await _writer.WriteLineAsync($"export {typeString}");
+                await _writer.WriteLineAsync($"export {await InterfaceGenerator.Generate(tsInterface)}");
+            }
+            else if (typeScriptType is TypeScriptEnum tsEnum)
+            {
+                await _writer.WriteLineAsync($"export {await EnumGenerator.Generate(tsEnum)}");
+            }
         }
     }
 
