@@ -7,12 +7,6 @@ public static class InterfaceGenerator
 {
     public static async Task<string> Generate(TypeScriptInterface tsInterface)
     {
-        var writer = new TypeScriptStringWriter
-        {
-            NewLine = "\n"
-        };
-
-        await writer.WriteAsync($"interface {tsInterface.Name}");
         var writer = new TypeScriptStringWriter();
         
         await writer.WriteAsync("interface ");
