@@ -30,5 +30,5 @@ public class EnumGeneratorTests
         
         // Assert
         Assert.That(result, Is.EqualTo("enum EnumWithValues {\n\tValue1 = \"Value1\",\n\tValue2 = \"Value2\",\n}"));
-    }
+    }   
 }
