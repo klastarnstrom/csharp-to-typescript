@@ -19,7 +19,7 @@ public class TypeScriptWriter : IAsyncDisposable
 
         _writer = new(filePath)
         {
-            NewLine = "\n"
+            NewLine = SpecialCharacters.UnixNewLine
         };
 
         _configuration = configuration;
