@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using CSharpToTypeScript.Library.Constants;
 using CSharpToTypeScript.Library.Generators;
 using CSharpToTypeScript.Library.Models;
@@ -25,7 +26,7 @@ public class TypeScriptWriter : IAsyncDisposable
         _configuration = configuration;
     }
 
-    internal async Task WriteTypeScriptFile(Dictionary<Type, TypeScriptType> typeScriptTypes)
+    internal async Task WriteTypeScriptFile(List<TypeScriptType> typeScriptTypes)
     {
         CreateOutputDirectory();
         ClearFile();
@@ -36,7 +37,7 @@ public class TypeScriptWriter : IAsyncDisposable
 
         await EmptyLine();
 
-        foreach (var (_, typeScriptType) in typeScriptTypes)
+        foreach (var typeScriptType in typeScriptTypes)
         {
             if (typeScriptType is TypeScriptInterface tsInterface
                 and ({ IsGeneric: false, IsGenericParameter: false } or { IsOpenGenericType: true }))

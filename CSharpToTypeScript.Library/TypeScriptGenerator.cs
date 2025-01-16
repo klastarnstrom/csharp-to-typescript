@@ -13,6 +13,6 @@ public class TypeScriptGenerator(TypeScriptConfiguration? configuration = null)
         // Collect all types from the assemblies that have the TsGenerate attribute as well as all nested types
         var collectedTypes = await new TypeCollector(assemblies).Collect();
         
-        await writer.WriteTypeScriptFile(collectedTypes);
+        await writer.WriteTypeScriptFile(collectedTypes.Values.ToList());
     }
 }
