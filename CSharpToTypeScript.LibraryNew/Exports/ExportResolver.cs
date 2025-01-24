@@ -1,4 +1,5 @@
 using System.Reflection;
+using CSharpToTypeScript.LibraryNew.Constants;
 using CSharpToTypeScript.LibraryNew.Exports.Types;
 using CSharpToTypeScript.LibraryNew.Extensions;
 
@@ -58,6 +59,8 @@ public class ExportResolver
 
             foreach (var genericArgument in type.GetGenericArguments())
             {
+                // Generic argument can't be safely ignored
+                ThrowIfTypeIsIgnored(genericArgument, ErrorMessage.GenericArgument(genericArgument));
                 ResolveType(genericArgument);
             }
 
@@ -80,6 +83,9 @@ public class ExportResolver
         {
             var property = new TsProperty(memberInfo);
 
+            // Property should be ignored if its type is ignored
+            ThrowIfTypeIsIgnored(property.PropertyType, ErrorMessage.PropertyTypeIsIgnored(property.PropertyType));
+
             ResolveType(property.PropertyType);
 
             tsInterface.AddProperty(property);
@@ -101,5 +107,13 @@ public class ExportResolver
         }
 
         return tsInterface;
+    }
+
+    private static void ThrowIfTypeIsIgnored(Type type, string message)
+    {
+        if (type.IsIgnored())
+        {
+            throw new InvalidOperationException(message);
+        }
     }
 }

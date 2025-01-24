@@ -1,4 +1,5 @@
 using System.Reflection;
+using CSharpToTypeScript.LibraryNew.Constants;
 
 namespace CSharpToTypeScript.LibraryNew.Exports.Types;
 
@@ -12,6 +13,6 @@ public class TsProperty(MemberInfo memberInfo)
     {
         PropertyInfo propertyInfo => propertyInfo.PropertyType,
         FieldInfo fieldInfo => fieldInfo.FieldType,
-        _ => throw new NotSupportedException($"MemberInfo {memberInfo.Name} is not supported")
+        _ => throw new NotSupportedException(ErrorMessage.MemberIsNotSupported(memberInfo))
     };
 }

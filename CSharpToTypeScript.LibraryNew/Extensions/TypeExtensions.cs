@@ -1,3 +1,5 @@
+using CSharpToTypeScript.LibraryNew.Constants;
+
 namespace CSharpToTypeScript.LibraryNew.Extensions;
 
 public static class TypeExtensions
@@ -29,7 +31,7 @@ public static class TypeExtensions
         }
 
         // If type is regular array, return the element type
-        return type.GetElementType() ?? throw new ArgumentException("Type is not an array", nameof(type));
+        return type.GetElementType() ?? throw new ArgumentException(ErrorMessage.TypeIsNotAnArray, nameof(type));
     }
     
     public static bool IsSystemType(this Type type) => type.FullName?.StartsWith("System.") == true;
