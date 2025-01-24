@@ -11,12 +11,7 @@ public class ExportResolver
 
     public void ResolveType(Type type)
     {
-        if (type.IsIgnored())
-        {
-            return;
-        }
-
-        if (type.IsSystemType())
+        if (SkipType(type))
         {
             return;
         }
@@ -91,14 +86,14 @@ public class ExportResolver
             tsInterface.AddProperty(property);
         }
 
-        if (type.BaseType != null && !type.BaseType.IsIgnored() && type.BaseType != typeof(object))
+        if (type.BaseType != null && !SkipType(type.BaseType))
         {
             tsInterface.SetBaseType(type.BaseType);
             ResolveType(type.BaseType);
         }
 
         var implementedInterfaces = type.GetInterfaces()
-            .Where(t => !t.IsIgnored() && !t.IsSystemType());
+            .Where(t => !SkipType(t));
 
         foreach (var interfaceType in implementedInterfaces)
         {
@@ -107,6 +102,26 @@ public class ExportResolver
         }
 
         return tsInterface;
+    }
+
+    private static bool SkipType(Type type)
+    {
+        if (type.IsIgnored())
+        {
+            return true;
+        }
+
+        if (type.IsSystemType())
+        {
+            return true;
+        }
+
+        if (type == typeof(object))
+        {
+            return true;
+        }
+        
+        return false;
     }
 
     private static void ThrowIfTypeIsIgnored(Type type, string message)
