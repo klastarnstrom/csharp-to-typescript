@@ -1,5 +1,5 @@
 ﻿using CSharpToTypeScript.ExampleData;
-using CSharpToTypeScript.LibraryNew;
+using CSharpToTypeScript.Library;
 
 new TypeScriptGenerator().Generate(new()
 {

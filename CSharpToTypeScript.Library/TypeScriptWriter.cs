@@ -1,14 +1,14 @@
-using System.Collections.Concurrent;
+
 using CSharpToTypeScript.Library.Constants;
-using CSharpToTypeScript.Library.Generators;
-using CSharpToTypeScript.Library.Models;
+using CSharpToTypeScript.Library.Exports.Base;
+using CSharpToTypeScript.Library.Exports;
 
 namespace CSharpToTypeScript.Library;
 
-public class TypeScriptWriter : IAsyncDisposable
+public class TypeScriptWriter : IDisposable
 {
-    private readonly TypeScriptConfiguration _configuration;
     private readonly StreamWriter _writer;
+    private readonly TypeScriptConfiguration _configuration;
 
     public TypeScriptWriter(TypeScriptConfiguration configuration)
     {
@@ -26,41 +26,31 @@ public class TypeScriptWriter : IAsyncDisposable
         _configuration = configuration;
     }
 
-    internal async Task WriteTypeScriptFile(List<TypeScriptType> typeScriptTypes)
+    internal void WriteTypeScriptFile(IEnumerable<ITsExport> typeScriptTypes)
     {
         CreateOutputDirectory();
         ClearFile();
 
-        await Comment($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Comment($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         
-        await BuiltInTypesGenerator.Generate(_writer);
-
-        await EmptyLine();
+        EmptyLine();
 
         foreach (var typeScriptType in typeScriptTypes)
         {
-            if (typeScriptType is TypeScriptInterface tsInterface
-                and ({ IsGeneric: false, IsGenericParameter: false } or { IsOpenGenericType: true }))
-            {
-                await _writer.WriteLineAsync($"export {await InterfaceGenerator.Generate(tsInterface)}");
-            }
-            else if (typeScriptType is TypeScriptEnum tsEnum)
-            {
-                await _writer.WriteLineAsync($"export {await EnumGenerator.Generate(tsEnum)}");
-            }
+            _writer.WriteLineAsync(typeScriptType.Export());
             
-            await EmptyLine();
+            EmptyLine();
         }
     }
 
-    private async Task Comment(string comment)
+    private void Comment(string comment)
     {
-        await _writer.WriteLineAsync($"{SpecialCharacters.SingleLineComment} {comment}");
+        _writer.WriteLineAsync($"{SpecialCharacters.SingleLineComment} {comment}");
     }
     
-    private async Task EmptyLine()
+    private void EmptyLine()
     {
-        await _writer.WriteLineAsync();
+        _writer.WriteLineAsync();
     }
 
     private void ClearFile()
@@ -73,9 +63,9 @@ public class TypeScriptWriter : IAsyncDisposable
         Directory.CreateDirectory(_configuration.OutputPath);
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        await _writer.DisposeAsync();
+        _writer.Dispose();
         GC.SuppressFinalize(this);
     }
 }

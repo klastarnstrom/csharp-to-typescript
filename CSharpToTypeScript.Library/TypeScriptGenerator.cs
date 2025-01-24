@@ -1,18 +1,35 @@
-using System.Reflection;
+using CSharpToTypeScript.Library.Exports;
+using CSharpToTypeScript.Library.Exports.Base;
+using CSharpToTypeScript.Library.Exports.Types.BuiltIn;
+using CSharpToTypeScript.Library.Attributes;
 
 namespace CSharpToTypeScript.Library;
 
-public class TypeScriptGenerator(TypeScriptConfiguration? configuration = null)
+public class TypeScriptGenerator
 {
-    private readonly TypeScriptConfiguration _configuration = configuration ?? new();
+    private readonly ExportResolver _exportResolver = new();
 
-    public async Task Generate(params Assembly[] assemblies)
+    private readonly ITsExport[] _builtInTypes =
+    [
+        new TsDateTimeString(),
+        new TsDateString(),
+        new TsGuid()
+    ];
+
+    public void Generate(TypeScriptConfiguration configuration)
     {
-        await using var writer = new TypeScriptWriter(_configuration);
+        var typesWithAttribute =
+            TypeCollector.CollectTypes(configuration.Assemblies);
         
-        // Collect all types from the assemblies that have the TsGenerate attribute as well as all nested types
-        var collectedTypes = await new TypeCollector(assemblies).Collect();
-        
-        await writer.WriteTypeScriptFile(collectedTypes.Values.ToList());
+        foreach (var type in typesWithAttribute)
+        {
+            _exportResolver.ResolveType(type);
+        }
+
+        using var writer = new TypeScriptWriter(configuration);
+
+        var types = _exportResolver.ExportContext.Exports;
+
+        writer.WriteTypeScriptFile(_builtInTypes.Concat(types));
     }
 }
