@@ -52,6 +52,43 @@ public class TsTypeName(Type type)
     });
 
     public string Name => GetName(type);
+    
+    public static string GetRootTypeName(Type type)
+    {
+        if (Nullable.GetUnderlyingType(type) is { } underlyingType)
+        {
+            return GetRootTypeName(underlyingType);
+        }
+        
+        var systemType = ConvenienceTypes.GetValueOrDefault(type) ??
+                         BuiltInReferenceTypes.GetValueOrDefault(type) ??
+                         PrimitiveTypes.GetValueOrDefault(type);
+
+        if (systemType is not null)
+        {
+            return systemType;
+        }
+
+        var name = type.Name;
+
+        if (type.IsEnum || !type.IsGenericType)
+        {
+            return name;
+        }
+
+        var genericArguments = type.GetGenericArguments();
+
+        if (type.IsDictionary())
+        {
+            return $"{{ [key: {GetName(genericArguments[0])}]: {GetName(genericArguments[1])} }}";
+        }
+
+        var genericTypeName = name[..name.IndexOf('`')];
+
+        var genericArgumentsNames = genericArguments.Select(GetName);
+
+        return $"{genericTypeName}<{string.Join(", ", genericArgumentsNames)}>";
+    }
 
     private static string GetName(Type type)
     {

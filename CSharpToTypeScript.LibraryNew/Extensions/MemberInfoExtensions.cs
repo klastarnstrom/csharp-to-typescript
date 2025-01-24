@@ -14,4 +14,18 @@ public static class MemberInfoExtensions
         
         return memberInfo.DeclaringType?.IsIgnored() == true;
     }
+    
+    public static bool IsMarkedAsNullable(this MemberInfo memberInfo)
+    {
+        var nullabilityContext = new NullabilityInfoContext();
+
+        var nullabilityInfo = memberInfo switch
+        {
+            PropertyInfo propertyInfo => nullabilityContext.Create(propertyInfo),
+            FieldInfo fieldInfo => nullabilityContext.Create(fieldInfo),
+            _ => throw new InvalidOperationException("Member is not property or field")
+        };
+
+        return nullabilityInfo.WriteState is NullabilityState.Nullable;
+    }
 }
