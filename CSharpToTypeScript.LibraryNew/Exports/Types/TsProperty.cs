@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace CSharpToTypeScript.LibraryNew.Exports;
+namespace CSharpToTypeScript.LibraryNew.Exports.Types;
 
 public class TsProperty(MemberInfo memberInfo)
 {

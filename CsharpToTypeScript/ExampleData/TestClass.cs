@@ -25,7 +25,6 @@ public class ClassWithNullableProperty
     public TestClass? NullableObjectProperty { get; set; }
 }
 
-[TsGenerate]
 public class GenericClass<T1, T2>
 {
     public T1 ValueProperty { get; set; }
@@ -33,8 +32,18 @@ public class GenericClass<T1, T2>
 }
 
 [TsGenerate]
-public class TestClass : ITestInterface
+public class InheritingGenericClass : GenericClass<string, int>
 {
+    public string ValueProperty3 { get; set; }
+}
+
+[TsGenerate]
+public record TestClass : ITestInterface
+{
+    public string[] StringArrayProperty { get; set; }
+    public List<string> StringListProperty { get; set; }
+    public IEnumerable<string> StringEnumerableProperty { get; set; }
+    public TestEnum1[] TestEnumArrayProperty { get; set; }
     public TestEnum1 EnumProperty { get; set; }
     public DateTime DateTimeProperty { get; set; }
     public string StringProperty { get; set; }

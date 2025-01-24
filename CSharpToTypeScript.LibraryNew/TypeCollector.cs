@@ -5,7 +5,7 @@ namespace CSharpToTypeScript.LibraryNew;
 
 public class TypeCollector
 {
-    public List<Type> CollectTypes(Assembly[] assemblies)
+    public static List<Type> CollectTypes(IEnumerable<Assembly> assemblies)
     {
         var typesWithAttribute = assemblies
             .SelectMany(assembly => assembly.GetTypes())

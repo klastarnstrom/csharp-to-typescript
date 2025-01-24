@@ -1,26 +1,27 @@
 using System.Collections.ObjectModel;
+using CSharpToTypeScript.LibraryNew.Exports.Types.BuiltIn;
 using CSharpToTypeScript.LibraryNew.Extensions;
 
-namespace CSharpToTypeScript.LibraryNew.Exports;
+namespace CSharpToTypeScript.LibraryNew.Exports.Types;
 
 public class TsTypeName(Type type)
 {
     private static readonly ReadOnlyDictionary<Type, string> ConvenienceTypes = new(new Dictionary<Type, string>
     {
-        { typeof(DateTime), "DateTimeString" },
-        { typeof(DateTime?), "DateTimeString" },
-        { typeof(DateOnly), "DateString" },
-        { typeof(DateOnly?), "DateString" },
+        { typeof(DateTime), TsDateTimeString.Name },
+        { typeof(DateTime?), TsDateTimeString.Name },
+        { typeof(DateOnly), TsDateString.Name },
+        { typeof(DateOnly?), TsDateString.Name },
+        { typeof(Guid), TsGuid.Name }
     });
 
     private static readonly ReadOnlyDictionary<Type, string> BuiltInReferenceTypes = new(new Dictionary<Type, string>
     {
-        { typeof(Guid), "Guid" },
         { typeof(TimeSpan), "string" },
         { typeof(string), "string" },
     });
 
-    public static readonly ReadOnlyDictionary<Type, string> PrimitiveTypes = new(new Dictionary<Type, string>
+    private static readonly ReadOnlyDictionary<Type, string> PrimitiveTypes = new(new Dictionary<Type, string>
     {
         { typeof(decimal), "number" },
         { typeof(decimal?), "number" },
@@ -53,6 +54,17 @@ public class TsTypeName(Type type)
     public string Name => GetName(type);
 
     private static string GetName(Type type)
+    {
+        var isEnumerable = type.IsEnumerable();
+
+        var effectiveType = isEnumerable ? type.GetEnumerableElementType() : type;
+
+        var rootTypeName = GetRootTypeName(effectiveType);
+
+        return isEnumerable ? $"{rootTypeName}[]" : rootTypeName;
+    }
+
+    private static string GetRootTypeName(Type type)
     {
         var systemType = ConvenienceTypes.GetValueOrDefault(type) ??
                          BuiltInReferenceTypes.GetValueOrDefault(type) ??
