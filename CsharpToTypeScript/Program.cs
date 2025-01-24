@@ -1,6 +1,5 @@
 ﻿using CSharpToTypeScript.ExampleData;
-using CSharpToTypeScript.Library;
+using CSharpToTypeScript.LibraryNew;
 
-var configuration = new TypeScriptConfiguration();
+new TypeScriptGenerator().Generate([typeof(TestClass).Assembly]);
 
-await new TypeScriptGenerator(configuration).Generate(typeof(TestClass).Assembly);

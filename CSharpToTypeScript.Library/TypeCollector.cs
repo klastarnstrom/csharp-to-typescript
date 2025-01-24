@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using CSharpToTypeScript.Library.Attributes;
 using CSharpToTypeScript.Library.Models;
@@ -57,7 +58,7 @@ public class TypeCollector(Assembly[] assemblies)
         {
             var tsEnum = new TypeScriptEnum(typeToResolve.Name, Enum.GetNames(typeToResolve).ToList());
 
-            visited.Add(typeToResolve, tsEnum);
+            _visited.TryAdd(typeToResolve, tsEnum);
 
             return new(tsEnum, false);
         }
@@ -143,7 +144,7 @@ public class TypeCollector(Assembly[] assemblies)
             }
         }
 
-        visited.TryAdd(type, typeScriptType);
+        _visited.TryAdd(type, typeScriptType);
 
         return typeScriptType;
     }

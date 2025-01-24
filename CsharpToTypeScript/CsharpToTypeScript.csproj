@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CSharpToTypeScript.Library\CSharpToTypeScript.Library.csproj" />
+      <ProjectReference Include="..\CSharpToTypeScript.LibraryNew\CSharpToTypeScript.LibraryNew.csproj" />
     </ItemGroup>
 
 </Project>

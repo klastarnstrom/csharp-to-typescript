@@ -1,41 +1,13 @@
-using CSharpToTypeScript.Library.Attributes;
+using CSharpToTypeScript.LibraryNew.Attributes;
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
 namespace CSharpToTypeScript.ExampleData;
-
-public class GenericClass<T1, T2>
-{
-    public T1 ValueProperty { get; set; }
-}
-
-public class GenericConsumer : GenericClass<string, OtherClass>;
-
 
 [TsGenerate]
 public class OtherClass
 {
     public Dictionary<string, int> ValueProperty { get; set; }
-}
-
-public class TestClass1
-{
-    public string ValueProperty { get; set; }
-    public string[] ValueArrayProperty { get; set; }
-    public TestEnum1 EnumProperty { get; set; }
-}
-
-public class TestClass2
-{
-    public TestClass1 ObjectProperty { get; set; }
-    public TestClass1[] ObjectArrayProperty { get; set; }
-    public List<TestClass1> ObjectListProperty { get; set; }
-}
-
-public class InheritingClass : BaseClass;
-
-public class BaseClass
-{
-    public string StringProperty { get; set; }
 }
 
 public enum TestEnum1
@@ -53,8 +25,17 @@ public class ClassWithNullableProperty
     public TestClass? NullableObjectProperty { get; set; }
 }
 
+[TsGenerate]
+public class GenericClass<T1, T2>
+{
+    public T1 ValueProperty { get; set; }
+    public T2 ValueProperty2 { get; set; }
+}
+
+[TsGenerate]
 public class TestClass : ITestInterface
 {
+    public TestEnum1 EnumProperty { get; set; }
     public DateTime DateTimeProperty { get; set; }
     public string StringProperty { get; set; }
     public byte ByteProperty { get; set; }
