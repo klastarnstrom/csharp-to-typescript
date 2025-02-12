@@ -8,6 +8,7 @@ namespace CSharpToTypeScript.Library.Exports;
 public class ExportResolver
 {
     public ExportContext ExportContext { get; } = new();
+    private readonly TypeNameRegistry _typeNameRegistry = new();
 
     public void ResolveType(Type type)
     {
@@ -16,9 +17,12 @@ public class ExportResolver
             return;
         }
 
+        // Get unique name for the type
+        var typeName = _typeNameRegistry.GetTypeName(type);
+
         if (type.IsEnum)
         {
-            ExportContext.AddExport(new TsEnum(type));
+            ExportContext.AddExport(new TsEnum(type, typeName));
         }
 
         if (type.IsEnumerable())
@@ -27,7 +31,7 @@ public class ExportResolver
         }
         else if (type.IsInterface || type.IsClass)
         {
-            var export = ResolveInterface(type);
+            var export = ResolveInterface(type, typeName);
 
             if (export is not null)
             {
@@ -36,7 +40,7 @@ public class ExportResolver
         }
     }
 
-    private TsInterface? ResolveInterface(Type type)
+    private TsInterface? ResolveInterface(Type type, string typeName)
     {
         if (type.IsGenericTypeParameter)
         {
@@ -66,7 +70,7 @@ public class ExportResolver
             }
         }
 
-        var tsInterface = new TsInterface(type);
+        var tsInterface = new TsInterface(type, typeName, _typeNameRegistry);
 
         var memberInfos = type
             .GetProperties()
@@ -120,7 +124,7 @@ public class ExportResolver
         {
             return true;
         }
-        
+
         return false;
     }
 

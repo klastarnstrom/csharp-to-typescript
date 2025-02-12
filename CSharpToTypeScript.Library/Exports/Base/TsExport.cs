@@ -8,10 +8,17 @@ public interface ITsExport
     public string Export();
 }
 
-public abstract class TsExport(Type type) : ITsExport
+public abstract class TsExport : ITsExport
 {
-    public Type Type { get; } = type;
+    public Type Type { get; }
     protected StringBuilder Builder { get; } = new();
-    protected TsTypeName TypeName { get; } = new(type);
+    protected string TypeName { get; }
+
+    protected TsExport(Type type, string typeName)
+    {
+        Type = type;
+        TypeName = typeName;
+    }
+
     public abstract string Export();
 }

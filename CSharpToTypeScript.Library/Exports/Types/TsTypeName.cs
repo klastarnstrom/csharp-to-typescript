@@ -52,14 +52,14 @@ public class TsTypeName(Type type)
     });
 
     public string Name => GetName(type);
-    
+
     public static string GetRootTypeName(Type type)
     {
         if (Nullable.GetUnderlyingType(type) is { } underlyingType)
         {
             return GetRootTypeName(underlyingType);
         }
-        
+
         var systemType = ConvenienceTypes.GetValueOrDefault(type) ??
                          BuiltInReferenceTypes.GetValueOrDefault(type) ??
                          PrimitiveTypes.GetValueOrDefault(type);
