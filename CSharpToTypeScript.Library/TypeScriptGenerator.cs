@@ -16,7 +16,7 @@ public class TypeScriptGenerator
         new TsGuid()
     ];
 
-    public void Generate(TypeScriptConfiguration configuration)
+    public async Task Generate(TypeScriptConfiguration configuration)
     {
         var typesWithAttribute =
             TypeCollector.CollectTypes(configuration.Assemblies);
@@ -26,10 +26,10 @@ public class TypeScriptGenerator
             _exportResolver.ResolveType(type);
         }
 
-        using var writer = new TypeScriptWriter(configuration);
+        await using var writer = new TypeScriptWriter(configuration);
 
         var types = _exportResolver.ExportContext.Exports;
 
-        writer.WriteTypeScriptFile(_builtInTypes.Concat(types));
+        await writer.WriteTypeScriptFile(_builtInTypes.Concat(types));
     }
 }

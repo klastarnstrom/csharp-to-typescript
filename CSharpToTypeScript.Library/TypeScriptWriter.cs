@@ -5,7 +5,7 @@ using CSharpToTypeScript.Library.Exports;
 
 namespace CSharpToTypeScript.Library;
 
-public class TypeScriptWriter : IDisposable
+public class TypeScriptWriter : IAsyncDisposable
 {
     private readonly StreamWriter _writer;
     private readonly TypeScriptConfiguration _configuration;
@@ -26,31 +26,31 @@ public class TypeScriptWriter : IDisposable
         _configuration = configuration;
     }
 
-    internal void WriteTypeScriptFile(IEnumerable<ITsExport> typeScriptTypes)
+    internal async Task WriteTypeScriptFile(IEnumerable<ITsExport> typeScriptTypes)
     {
         CreateOutputDirectory();
         ClearFile();
 
-        Comment($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        await Comment($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         
-        EmptyLine();
+        await EmptyLine();
 
         foreach (var typeScriptType in typeScriptTypes)
         {
-            _writer.WriteLineAsync(typeScriptType.Export());
+            await _writer.WriteLineAsync(typeScriptType.Export());
             
-            EmptyLine();
+            await EmptyLine();
         }
     }
 
-    private void Comment(string comment)
+    private async Task Comment(string comment)
     {
-        _writer.WriteLineAsync($"{SpecialCharacters.SingleLineComment} {comment}");
+        await _writer.WriteLineAsync($"{SpecialCharacters.SingleLineComment} {comment}");
     }
     
-    private void EmptyLine()
+    private async Task EmptyLine()
     {
-        _writer.WriteLineAsync();
+        await _writer.WriteLineAsync();
     }
 
     private void ClearFile()
@@ -63,9 +63,9 @@ public class TypeScriptWriter : IDisposable
         Directory.CreateDirectory(_configuration.OutputPath);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _writer.Dispose();
+        await _writer.DisposeAsync();
         GC.SuppressFinalize(this);
     }
 }
