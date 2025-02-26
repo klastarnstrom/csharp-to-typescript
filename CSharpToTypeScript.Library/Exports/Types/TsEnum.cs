@@ -8,14 +8,14 @@ public class TsEnum(Type type) : TsExport(type)
     
     public override string Export()
     {
-        Builder.AppendLine($"export enum {TypeName.Name} {{");
+        Builder.WriteLine($"export enum {TypeName.Name} {{");
         
-        for (var i = 0; i < Values.Length; i++)
+        foreach (var value in Values)
         {
-            Builder.AppendLine($"    {Values[i]} = {i},");
+            Builder.WriteLine($"\t{value} = \"{value}\",");
         }
         
-        Builder.AppendLine("}");
+        Builder.WriteLine("}");
         
         return Builder.ToString();
     }

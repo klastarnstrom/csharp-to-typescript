@@ -1,4 +1,4 @@
-using System.Text;
+using CSharpToTypeScript.Library.Constants;
 using CSharpToTypeScript.Library.Exports.Types;
 
 namespace CSharpToTypeScript.Library.Exports.Base;
@@ -11,7 +11,7 @@ public interface ITsExport
 public abstract class TsExport(Type type) : ITsExport
 {
     public Type Type { get; } = type;
-    protected StringBuilder Builder { get; } = new();
+    protected StringWriter Builder { get; } = new() { NewLine = SpecialCharacters.UnixNewLine };
     protected TsTypeName TypeName { get; } = new(type);
     public abstract string Export();
 }
