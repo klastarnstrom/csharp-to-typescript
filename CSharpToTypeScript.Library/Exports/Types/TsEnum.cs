@@ -2,28 +2,21 @@ using CSharpToTypeScript.Library.Exports.Base;
 
 namespace CSharpToTypeScript.Library.Exports.Types;
 
-public class TsEnum : TsExport
+public class TsEnum(Type type) : TsExport(type)
 {
-    private readonly string[] _values;
-    private readonly string _typeName;
-
-    public TsEnum(Type type, string typeName) : base(type, typeName)
-    {
-        _values = Enum.GetNames(type);
-        _typeName = typeName;
-    }
-
+    private string[] Values { get; } = Enum.GetNames(type);
+    
     public override string Export()
     {
-        Builder.AppendLine($"export enum {_typeName} {{");
-
-        for (var i = 0; i < _values.Length; i++)
+        Builder.AppendLine($"export enum {TypeName.Name} {{");
+        
+        for (var i = 0; i < Values.Length; i++)
         {
-            Builder.AppendLine($"    {_values[i]} = {i},");
+            Builder.AppendLine($"    {Values[i]} = {i},");
         }
-
+        
         Builder.AppendLine("}");
-
+        
         return Builder.ToString();
     }
 }

@@ -2,34 +2,25 @@ using CSharpToTypeScript.Library.Exports.Base;
 
 namespace CSharpToTypeScript.Library.Exports.Types;
 
-public class TsInterface : TsExport
+public class TsInterface(Type type) : TsExport(type)
 {
-    private readonly List<TsProperty> _properties = [];
-    private string? _baseTypeName;
-    private readonly List<string> _implementedInterfaceNames = [];
-    private readonly string _typeName;
-    private readonly TypeNameRegistry _typeNameRegistry;
-
-    public TsInterface(Type type, string typeName, TypeNameRegistry typeNameRegistry) : base(type, typeName)
-    {
-        _typeName = typeName;
-        _typeNameRegistry = typeNameRegistry;
-    }
+    private List<TsProperty> Properties { get; } = [];
+    private TsTypeName? BaseType { get; set; }
+    private List<TsTypeName> ImplementedInterfaces { get; } = [];
 
     public override string Export()
     {
-        Builder.Append($"export interface {_typeName} ");
+        Builder.Append($"export interface {TypeName.Name} ");
 
         AppendInheritance();
 
         Builder.AppendLine("{");
 
-        foreach (var property in _properties)
+        foreach (var property in Properties)
         {
             var nullability = property.IsMarkedAsNullable ? "?" : "";
-            var propertyTypeName = _typeNameRegistry.GetTypeName(property.PropertyType);
-
-            Builder.AppendLine($"    {property.Name}{nullability}: {propertyTypeName};");
+            
+            Builder.AppendLine($"    {property.Name}{nullability}: {property.Type};");
         }
 
         Builder.AppendLine("}");
@@ -39,43 +30,43 @@ public class TsInterface : TsExport
 
     public void AddProperty(TsProperty property)
     {
-        _properties.Add(property);
+        Properties.Add(property);
     }
 
     public void AddImplementedInterface(Type implementedInterface)
     {
-        _implementedInterfaceNames.Add(_typeNameRegistry.GetTypeName(implementedInterface));
+        ImplementedInterfaces.Add(new(implementedInterface));
     }
 
     public void SetBaseType(Type baseType)
     {
-        _baseTypeName = _typeNameRegistry.GetTypeName(baseType);
+        BaseType = new(baseType);
     }
 
     private void AppendInheritance()
     {
-        if (_baseTypeName is null && _implementedInterfaceNames.Count == 0)
+        if (BaseType is null && ImplementedInterfaces.Count == 0)
         {
             return;
         }
 
         Builder.Append("extends ");
 
-        if (_baseTypeName is not null)
+        if (BaseType is not null)
         {
-            Builder.Append(_baseTypeName);
+            Builder.Append(new TsTypeName(Type.BaseType!).Name);
 
-            if (_implementedInterfaceNames.Count > 0)
+            if (ImplementedInterfaces.Count > 0)
             {
                 Builder.Append(", ");
             }
         }
 
-        for (var i = 0; i < _implementedInterfaceNames.Count; i++)
+        for (var i = 0; i < ImplementedInterfaces.Count; i++)
         {
-            Builder.Append(_implementedInterfaceNames[i]);
+            Builder.Append(ImplementedInterfaces[i].Name);
 
-            if (i < _implementedInterfaceNames.Count - 1)
+            if (i < ImplementedInterfaces.Count - 1)
             {
                 Builder.Append(", ");
             }
