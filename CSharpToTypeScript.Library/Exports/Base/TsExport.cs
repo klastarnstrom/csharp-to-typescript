@@ -1,3 +1,4 @@
+using System.Reflection;
 using CSharpToTypeScript.Library.Constants;
 using CSharpToTypeScript.Library.Exports.Types;
 
@@ -8,10 +9,28 @@ public interface ITsExport
     public string Export();
 }
 
-public abstract class TsExport(Type type) : ITsExport
+public abstract class TsExport : ITsExport
 {
-    public Type Type { get; } = type;
+    public Type Type { get; }
     protected StringWriter Builder { get; } = new() { NewLine = SpecialCharacters.UnixNewLine };
-    protected TsTypeName TypeName { get; } = new(type);
+    protected TsTypeName TypeName { get; }
     public abstract string Export();
+
+    protected TsExport(MemberInfo memberInfo)
+    {
+        Type = memberInfo switch
+        {
+            PropertyInfo propertyInfo => propertyInfo.PropertyType,
+            FieldInfo fieldInfo => fieldInfo.FieldType,
+            _ => throw new NotSupportedException(ErrorMessage.MemberIsNotSupported(memberInfo))
+        };
+        
+        TypeName = new(Type);
+    }
+    
+    protected TsExport(Type type)
+    {
+        Type = type;
+        TypeName = new(type);
+    }
 }

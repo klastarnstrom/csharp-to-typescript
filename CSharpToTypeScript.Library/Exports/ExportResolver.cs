@@ -79,9 +79,9 @@ public class ExportResolver
             var property = new TsProperty(memberInfo);
 
             // Property should be ignored if its type is ignored
-            ThrowIfTypeIsIgnored(property.PropertyType, ErrorMessage.PropertyTypeIsIgnored(property.PropertyType));
+            ThrowIfTypeIsIgnored(property.Type, ErrorMessage.PropertyTypeIsIgnored(property.Type));
 
-            ResolveType(property.PropertyType);
+            ResolveType(property.Type);
 
             tsInterface.AddProperty(property);
         }

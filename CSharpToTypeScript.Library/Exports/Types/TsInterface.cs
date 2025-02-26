@@ -10,20 +10,18 @@ public class TsInterface(Type type) : TsExport(type)
 
     public override string Export()
     {
-        Builder.Append($"export interface {TypeName.Name} ");
+        Builder.Write($"export interface {TypeName.Name} ");
 
-        AppendInheritance();
+        WriteInheritance();
 
-        Builder.AppendLine("{");
+        Builder.WriteLine("{");
 
         foreach (var property in Properties)
         {
-            var nullability = property.IsMarkedAsNullable ? "?" : "";
-            
-            Builder.AppendLine($"    {property.Name}{nullability}: {property.Type};");
+            Builder.WriteLine(property.Export());
         }
 
-        Builder.AppendLine("}");
+        Builder.WriteLine("}");
 
         return Builder.ToString();
     }
@@ -40,36 +38,58 @@ public class TsInterface(Type type) : TsExport(type)
 
     public void SetBaseType(Type baseType)
     {
+        if (Type.IsInterface)
+        {
+            throw new InvalidOperationException("Interfaces cannot have a base type");
+        }
+
+        if (baseType.IsInterface)
+        {
+            throw new InvalidOperationException("Interfaces cannot be used as a base type");
+        }
+        
+        if (baseType.IsEnum)
+        {
+            throw new InvalidOperationException("Enums cannot be used as a base type");
+        }
+        
         BaseType = new(baseType);
     }
 
-    private void AppendInheritance()
+    private void WriteInheritance()
     {
         if (BaseType is null && ImplementedInterfaces.Count == 0)
         {
             return;
         }
-
-        Builder.Append("extends ");
+        
+        Builder.Write("extends ");
 
         if (BaseType is not null)
         {
-            Builder.Append(new TsTypeName(Type.BaseType!).Name);
+            if (Type.BaseType is null)
+            {
+                throw new InvalidOperationException("Base type is null");
+            }
+            
+            Builder.Write(new TsTypeName(Type.BaseType).Name);
 
             if (ImplementedInterfaces.Count > 0)
             {
-                Builder.Append(", ");
+                Builder.Write(", ");
             }
         }
 
         for (var i = 0; i < ImplementedInterfaces.Count; i++)
         {
-            Builder.Append(ImplementedInterfaces[i].Name);
+            Builder.Write(ImplementedInterfaces[i].Name);
 
             if (i < ImplementedInterfaces.Count - 1)
             {
-                Builder.Append(", ");
+                Builder.Write(", ");
             }
         }
+        
+        Builder.Write(" ");
     }
 }
