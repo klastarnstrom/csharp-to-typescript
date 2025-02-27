@@ -72,7 +72,7 @@ public class TsInterface(Type type) : TsExport(type)
                 throw new InvalidOperationException("Base type is null");
             }
             
-            Builder.Write(new TsTypeName(Type.BaseType).Name);
+            Builder.Write(BaseType.Name);
 
             if (ImplementedInterfaces.Count > 0)
             {
