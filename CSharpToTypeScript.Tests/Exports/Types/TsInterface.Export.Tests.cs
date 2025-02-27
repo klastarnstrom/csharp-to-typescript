@@ -48,7 +48,7 @@ public partial class TsInterfaceTests : BaseExportTest
     }
 
     [Test]
-    public void InterfaceWithProperties_ShouldExportCorrectly()
+    public void Interface_With_Properties_Should_Export_Correctly()
     {
         // Arrange
         var tsInterface = new TsInterface(typeof(IWithProperties));
@@ -75,10 +75,11 @@ public partial class TsInterfaceTests : BaseExportTest
         const char tab = '\t';
 
         Writer.WriteLine($"export interface {interfaceName} {{");
-        Writer.WriteLine($"{tab}StringProperty: string;");
-        Writer.WriteLine($"{tab}NumberProperty: number;");
-        Writer.WriteLine($"{tab}NullableProperty?: boolean;");
+        Writer.WriteLine($"{tab}{stringProperty.Name}: string;");
+        Writer.WriteLine($"{tab}{numberProperty.Name}: number;");
+        Writer.WriteLine($"{tab}{nullableProperty.Name}?: boolean;");
         Writer.WriteLine("}");
+
         var expected = Writer.ToString();
 
         Assert.That(result, Is.EqualTo(expected));
@@ -120,12 +121,12 @@ public partial class TsInterfaceTests : BaseExportTest
                            export interface {{className}} {
                            }
                            """);
-        
+
         var expected = Writer.ToString();
 
         Assert.That(result, Is.EqualTo(expected));
     }
-    
+
     [Test]
     public void Class_With_Base_Class_Should_Export_Correctly()
     {
